@@ -1,34 +1,39 @@
-name: Sync from sitepdw3
+name: Sync from sitepdw3 (main) to pdw-site-v2 (master)
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Executa de hora a hora (ajusta como quiseres)
-  workflow_dispatch:      # Permite executar manualmente no GitHub
+    - cron: '0 * * * *'  # Executa de hora a hora
+  workflow_dispatch:      # Permite executar manualmente
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout destination repo
+      - name: Checkout destination repo (master)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}  # Usa o PAT que criaste
+          ref: master  # Força checkout da branch master
 
-      - name: Sync from source repo
+      - name: Configure Git
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-          # Adiciona o repositório de origem como remote
-          git remote add source https://github.com/rmagalhaes-byte/sitepdw3.git
+      - name: Remove existing 'source' remote (if any)
+        run: git remote remove source || true
 
-          # Busca as alterações do repositório de origem
-          git fetch source
+      - name: Add source repo as remote
+        run: git remote add source https://github.com/rmagalhaes-byte/sitepdw3.git
 
-          # Faz merge da branch principal (ajusta 'main' ou 'master' conforme necessário)
-          git checkout main  # ou 'master' se for o caso
+      - name: Fetch from source (main)
+        run: git fetch source main
+
+      - name: Merge changes from source/main to master
+        run: |
+          git checkout master
           git merge source/main --allow-unrelated-histories -X theirs --no-edit
 
-          # Envia as alterações para o repositório de destino
-          git push origin main
+      - name: Push changes to master
+        run: git push origin master
