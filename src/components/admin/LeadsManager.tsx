@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 interface Lead {
   id: number;
@@ -65,7 +65,7 @@ export function LeadsManager() {
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
-            className="btn btn--ghost btn--sm"
+            className="admin-btn admin-btn--ghost"
             onClick={sendTestEmail}
             disabled={testStatus === 'sending'}
             style={{ fontSize: 13 }}
@@ -76,7 +76,7 @@ export function LeadsManager() {
             {testStatus === 'error' && '✗ Erro no envio'}
           </button>
           <button
-            className="btn btn--primary btn--sm"
+            className="admin-btn admin-btn--primary"
             onClick={downloadCsv}
             disabled={total === 0}
             style={{ fontSize: 13 }}
@@ -114,9 +114,8 @@ export function LeadsManager() {
             </thead>
             <tbody>
               {leads.map((lead) => (
-                <>
+                <Fragment key={lead.id}>
                   <tr
-                    key={lead.id}
                     style={{ borderBottom: '1px solid var(--color-border, #e5e7eb)', cursor: 'pointer' }}
                     onClick={() => setExpanded(expanded === lead.id ? null : lead.id)}
                   >
@@ -142,7 +141,7 @@ export function LeadsManager() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>

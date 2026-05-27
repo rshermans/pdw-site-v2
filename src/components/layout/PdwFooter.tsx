@@ -144,7 +144,7 @@ export function PdwFooter({ lang, dict }: PdwFooterProps) {
             <h3 className="footer-col-title">
               {lang === "pt" ? "Navegação" : "Navigation"}
             </h3>
-            <nav className="footer-nav" aria-label="Footer navigation">
+            <nav className="footer-nav" aria-label={lang === "pt" ? "Navegação do rodapé" : "Footer navigation"}>
               {quickLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -207,13 +207,13 @@ export function PdwFooter({ lang, dict }: PdwFooterProps) {
           </div>
           <div className="footer-funders-logos">
             <div className="funder-logo-wrapper">
-              <Image src="/PRR.png" alt="PRR" fill className="funders-img" />
+              <Image src="/PRR.png" alt="PRR" fill sizes="(max-width: 768px) 120px, 160px" className="funders-img" />
             </div>
             <div className="funder-logo-wrapper">
-              <Image src="/RP.png" alt="República Portuguesa" fill className="funders-img" />
+              <Image src="/RP.png" alt="República Portuguesa" fill sizes="(max-width: 768px) 120px, 160px" className="funders-img" />
             </div>
             <div className="funder-logo-wrapper">
-              <Image src="/FEU.png" alt="União Europeia" fill className="funders-img" />
+              <Image src="/FEU.png" alt="União Europeia" fill sizes="(max-width: 768px) 120px, 160px" className="funders-img" />
             </div>
           </div>
         </div>

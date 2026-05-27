@@ -10,6 +10,7 @@ export function ContactCTA({ lang, dict }: ContactCTAProps) {
   return (
     <section
       className="diploma-case-section"
+      aria-labelledby="contact-cta-title"
       style={{
         marginTop: 16,
         background: "linear-gradient(135deg, #006c4b 0%, #1a3b5d 100%)",
@@ -28,17 +29,17 @@ export function ContactCTA({ lang, dict }: ContactCTAProps) {
       <div style={{ position: "relative", zIndex: 1 }}>
         <span style={{
           display: "inline-block",
-          fontSize: 11, fontWeight: 700,
+          fontSize: 12, fontWeight: 700,
           textTransform: "uppercase", letterSpacing: "0.14em",
-          color: "rgba(255,255,255,0.65)",
+          color: "#cbd5e1",
           marginBottom: 8,
         }}>
           Próximo passo
         </span>
-        <h2 style={{ margin: "0 0 8px", color: "#fff", fontSize: "clamp(1.2rem, 2.5vw, 1.6rem)", fontWeight: 800, lineHeight: 1.2 }}>
+        <h2 id="contact-cta-title" style={{ margin: "0 0 8px", color: "#fff", fontSize: "clamp(1.2rem, 2.5vw, 1.6rem)", fontWeight: 800, lineHeight: 1.2 }}>
           {dict.contactCTA.title}
         </h2>
-        <p style={{ margin: 0, color: "rgba(255,255,255,0.72)", fontSize: 15, lineHeight: 1.6, maxWidth: 540 }}>
+        <p style={{ margin: 0, color: "#ffffff", fontSize: 15, lineHeight: 1.6, maxWidth: 540 }}>
           {dict.contactCTA.subtitle}
         </p>
       </div>

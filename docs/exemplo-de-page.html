@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html lang="pt"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#2d3133",
+                        "on-surface": "#181c1e",
+                        "surface-container-high": "#e5e9eb",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#006c4b",
+                        "tertiary-fixed-dim": "#74d1ff",
+                        "on-tertiary-fixed": "#001e2b",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e0e3e5",
+                        "surface-dim": "#d7dadc",
+                        "secondary-fixed-dim": "#a0cbf3",
+                        "primary-fixed-dim": "#66dca9",
+                        "surface-container": "#ebeef0",
+                        "tertiary": "#006687",
+                        "inverse-on-surface": "#eef1f3",
+                        "surface-bright": "#f7fafc",
+                        "on-primary-fixed": "#002114",
+                        "surface": "#f7fafc",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary-fixed": "#84f8c4",
+                        "on-background": "#181c1e",
+                        "on-secondary-container": "#305e80",
+                        "outline": "#6d7a72",
+                        "on-tertiary-fixed-variant": "#004d67",
+                        "secondary": "#366285",
+                        "on-secondary-fixed-variant": "#1a4a6c",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f1f4f6",
+                        "secondary-container": "#abd6ff",
+                        "outline-variant": "#bccac0",
+                        "on-tertiary-container": "#003042",
+                        "on-surface-variant": "#3d4a42",
+                        "tertiary-fixed": "#c1e8ff",
+                        "on-primary-container": "#003321",
+                        "on-secondary-fixed": "#001d31",
+                        "tertiary-container": "#1b9ece",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#cce5ff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#005138",
+                        "inverse-primary": "#66dca9",
+                        "primary": "#006c4b",
+                        "primary-container": "#26a678",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#f7fafc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "80px",
+                        "margin": "32px",
+                        "sm": "12px",
+                        "md": "24px",
+                        "lg": "48px",
+                        "gutter": "24px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Public Sans"],
+                        "label-md": ["Public Sans"],
+                        "headline-xl": ["Public Sans"],
+                        "caption": ["Public Sans"],
+                        "headline-lg": ["Public Sans"],
+                        "body-md": ["Public Sans"],
+                        "body-lg": ["Public Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "headline-xl": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-file {
+            background-color: #f1f4f6;
+            border-left: 3px solid #006c4b;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 bg-white/95 border-b border-[#D1D9E0] h-16">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-full">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-[#26A678]">Portuguese Digital Wallet</span>
+<div class="hidden md:flex gap-6">
+<a class="font-['Public_Sans'] text-sm tracking-tight text-slate-500 hover:text-[#26A678] transition-colors duration-200" href="#">Solutions</a>
+<a class="font-['Public_Sans'] text-sm tracking-tight text-slate-500 hover:text-[#26A678] transition-colors duration-200" href="#">Security</a>
+<a class="font-['Public_Sans'] text-sm tracking-tight text-slate-500 hover:text-[#26A678] transition-colors duration-200" href="#">Verification</a>
+<a class="font-['Public_Sans'] text-sm tracking-tight text-[#26A678] font-semibold border-b-2 border-[#26A678] pb-1" href="#">Institutional</a>
+</div>
+</div>
+<div class="flex gap-4">
+<button class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-[#26A678]">Access Wallet</button>
+<button class="px-4 py-2 text-sm font-semibold bg-primary text-on-primary rounded-lg">Register</button>
+</div>
+</div>
+</nav>
+<main class="pt-24 pb-16 px-6 max-w-7xl mx-auto">
+<!-- Header Section -->
+<header class="mb-12">
+<h1 class="font-headline-xl text-headline-xl text-on-surface mb-2">Documentação e Transparência</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                Explore o nosso ecossistema de código aberto e normas técnicas. Garantimos a soberania digital através da transparência total.
+            </p>
+</header>
+<!-- Main Dashboard Grid -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Side-by-Side Live Repository Explorer (8 Columns) -->
+<section class="col-span-12 lg:col-span-8 flex flex-col h-[700px] border border-outline-variant rounded-xl overflow-hidden bg-surface-container-lowest">
+<!-- Toolbar -->
+<div class="h-12 border-b border-outline-variant flex items-center justify-between px-md bg-surface-container-low">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-size: 18px;">folder_open</span>
+<span class="font-label-md text-label-md text-on-surface-variant">portugal-digital-wallet / docs / specifications</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="flex items-center gap-xs px-3 py-1 bg-primary-container text-on-primary-container rounded-lg text-xs font-semibold">
+<span class="material-symbols-outlined" style="font-size: 14px;">terminal</span>
+<span>Open in CLI</span>
+</button>
+</div>
+</div>
+<div class="flex flex-1 overflow-hidden">
+<!-- File List Sidebar -->
+<div class="w-1/3 border-r border-outline-variant overflow-y-auto bg-surface-container-lowest">
+<div class="p-base font-caption text-caption text-outline uppercase tracking-widest bg-surface-container-low">Files</div>
+<div class="group flex items-center gap-sm p-md cursor-pointer hover:bg-surface-container-high transition-colors active-file">
+<span class="material-symbols-outlined text-[#26A678]" data-icon="picture_as_pdf">picture_as_pdf</span>
+<span class="font-label-md text-label-md">Especificações Técnicas v2.1.pdf</span>
+</div>
+<div class="group flex items-center gap-sm p-md cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[#26A678]" data-icon="picture_as_pdf">picture_as_pdf</span>
+<span class="font-label-md text-label-md">Arquitetura eIDAS 2.0.pdf</span>
+</div>
+<div class="group flex items-center gap-sm p-md cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[#26A678]" data-icon="picture_as_pdf">picture_as_pdf</span>
+<span class="font-label-md text-label-md">Guia de Integração para Universidades.pdf</span>
+</div>
+<div class="group flex items-center gap-sm p-md cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-secondary" data-icon="description">description</span>
+<span class="font-label-md text-label-md">WHITE_PAPER_EN_PT.md</span>
+</div>
+<div class="group flex items-center gap-sm p-md cursor-pointer hover:bg-surface-container-high transition-colors opacity-50">
+<span class="material-symbols-outlined text-secondary" data-icon="folder">folder</span>
+<span class="font-label-md text-label-md">legacy_docs</span>
+</div>
+</div>
+<!-- PDF Previewer (Mock) -->
+<div class="flex-1 bg-surface-variant p-lg overflow-y-auto flex justify-center">
+<div class="w-full max-w-2xl bg-white shadow-lg p-xl min-h-[900px] border border-outline-variant relative">
+<!-- Paper Header -->
+<div class="flex justify-between items-start mb-md">
+<div class="w-16 h-16 bg-primary-container rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-white" data-icon="account_balance" style="font-size: 32px;">account_balance</span>
+</div>
+<div class="text-right">
+<p class="font-caption text-caption text-outline">Ref: PT-EID-2024-V2</p>
+<p class="font-caption text-caption text-outline">Setembro 2024</p>
+</div>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-md">Especificações Técnicas v2.1</h2>
+<h3 class="font-label-md text-label-md text-primary mb-lg">Infraestrutura Nacional de Identidade Digital</h3>
+<div class="space-y-md">
+<div class="h-4 bg-surface-container w-full rounded"></div>
+<div class="h-4 bg-surface-container w-11/12 rounded"></div>
+<div class="h-4 bg-surface-container w-4/5 rounded"></div>
+<div class="h-4 bg-surface-container w-full rounded"></div>
+<div class="py-lg flex justify-center">
+<div class="w-48 h-48 border-2 border-dashed border-outline-variant rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant" style="font-size: 48px;">schema</span>
+</div>
+</div>
+<div class="h-4 bg-surface-container w-full rounded"></div>
+<div class="h-4 bg-surface-container w-10/12 rounded"></div>
+<div class="h-4 bg-surface-container w-full rounded"></div>
+</div>
+<div class="absolute bottom-md left-md right-md flex justify-between items-center pt-md border-t border-surface-container">
+<p class="font-caption text-caption text-outline">Oficial - República Portuguesa</p>
+<p class="font-caption text-caption text-outline">Página 1 de 42</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Sidebar Column (4 Columns) -->
+<div class="col-span-12 lg:col-span-4 space-y-gutter">
+<!-- Code Transparency Card -->
+<div class="p-md bg-on-background text-surface border border-outline rounded-xl shadow-xl">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-label-md text-label-md text-primary-fixed">Transparência de Código</h3>
+<span class="flex items-center gap-xs px-2 py-1 bg-green-900 text-primary-fixed text-[10px] rounded uppercase font-bold tracking-widest">Live Feed</span>
+</div>
+<div class="space-y-md">
+<!-- Commit 1 -->
+<div class="flex gap-sm border-l-2 border-primary pl-md relative">
+<div class="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-primary"></div>
+<div>
+<p class="font-caption text-caption text-slate-400">#a7f2091 • há 14 minutos</p>
+<p class="font-label-md text-label-md text-surface">feat: Integração com carteira eIDAS 2.0</p>
+<p class="font-caption text-caption text-slate-500">M. Santos (Core Developer)</p>
+</div>
+</div>
+<!-- Commit 2 -->
+<div class="flex gap-sm border-l-2 border-outline pl-md relative">
+<div class="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-outline"></div>
+<div>
+<p class="font-caption text-caption text-slate-400">#9c34e21 • há 2 horas</p>
+<p class="font-label-md text-label-md text-surface">docs: Atualização de guia para Universidades</p>
+<p class="font-caption text-caption text-slate-500">Ana Rodrigues (Technical Writer)</p>
+</div>
+</div>
+<!-- Commit 3 -->
+<div class="flex gap-sm border-l-2 border-outline pl-md relative">
+<div class="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-outline"></div>
+<div>
+<p class="font-caption text-caption text-slate-400">#3d11b88 • Ontem</p>
+<p class="font-label-md text-label-md text-surface">fix: Refatoração do módulo de criptografia</p>
+<p class="font-caption text-caption text-slate-500">J. Oliveira (Security Lead)</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-lg py-3 px-4 bg-surface-container-lowest text-on-surface rounded-lg font-label-md text-label-md flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined" style="font-size: 18px;">terminal</span>
+                        Contribuir no GitHub
+                    </button>
+</div>
+<!-- Compliance Status Card -->
+<div class="p-md bg-surface border border-outline-variant rounded-xl">
+<div class="flex items-center gap-sm mb-md">
+<span class="material-symbols-outlined text-primary" data-icon="verified">verified</span>
+<h3 class="font-headline-md text-headline-md">Conformidade eIDAS</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">
+                        O protocolo segue rigorosamente os padrões da União Europeia para identificação eletrónica e serviços de confiança.
+                    </p>
+<div class="grid grid-cols-2 gap-sm">
+<div class="p-sm bg-surface-container rounded-lg border border-outline-variant">
+<p class="font-caption text-caption text-outline">QTSP Status</p>
+<p class="font-label-md text-label-md text-on-surface">Validado</p>
+</div>
+<div class="p-sm bg-surface-container rounded-lg border border-outline-variant">
+<p class="font-caption text-caption text-outline">Encryption</p>
+<p class="font-label-md text-label-md text-on-surface">AES-256-GCM</p>
+</div>
+</div>
+</div>
+<!-- Open Source Values -->
+<div class="p-md bg-secondary-container text-on-secondary-container rounded-xl">
+<h3 class="font-label-md text-label-md mb-sm flex items-center gap-xs">
+<span class="material-symbols-outlined" style="font-size: 18px;">security</span>
+                        Soberania Tecnológica
+                    </h3>
+<p class="font-caption text-caption">
+                        Todo o código-fonte de núcleo é auditável publicamente para garantir que nenhum dado saia do controlo do cidadão português.
+                    </p>
+</div>
+</div>
+</div>
+<!-- Featured Resource Bento Section -->
+<section class="mt-xl">
+<h2 class="font-headline-md text-headline-md mb-md">Recursos Adicionais</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="p-lg bg-surface-container-lowest border border-outline-variant rounded-xl group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-primary mb-md" data-icon="book" style="font-size: 32px;">book</span>
+<h4 class="font-headline-md text-headline-md mb-xs">Wiki Técnica</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">Documentação completa da API e guias de implementação para programadores.</p>
+<a class="font-label-md text-label-md text-primary flex items-center gap-xs" href="#">Explorar Wiki <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span></a>
+</div>
+<div class="p-lg bg-surface-container-lowest border border-outline-variant rounded-xl group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-secondary mb-md" data-icon="forum" style="font-size: 32px;">forum</span>
+<h4 class="font-headline-md text-headline-md mb-xs">Fórum Dev</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">Espaço de discussão para melhorias técnicas e suporte da comunidade.</p>
+<a class="font-label-md text-label-md text-primary flex items-center gap-xs" href="#">Participar <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span></a>
+</div>
+<div class="p-lg bg-surface-container-lowest border border-outline-variant rounded-xl group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-tertiary mb-md" data-icon="bug_report" style="font-size: 32px;">bug_report</span>
+<h4 class="font-headline-md text-headline-md mb-xs">Bug Bounty</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">Programa de recompensas para reporte de vulnerabilidades de segurança.</p>
+<a class="font-label-md text-label-md text-primary flex items-center gap-xs" href="#">Saber mais <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span></a>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-50 border-t border-[#D1D9E0] mt-xl">
+<div class="max-w-7xl mx-auto px-6 py-12">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+<div>
+<h3 class="text-lg font-semibold text-slate-900 mb-4">Portuguese Digital Wallet</h3>
+<p class="font-['Public_Sans'] text-xs text-slate-500 max-w-sm">
+                        Uma iniciativa oficial da República Portuguesa para garantir a identidade digital segura e acessível a todos os cidadãos.
+                    </p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<p class="font-label-md text-label-md text-on-surface">Legal</p>
+<a class="block font-['Public_Sans'] text-xs text-slate-500 hover:underline decoration-[#26A678] underline-offset-4" href="#">Privacy Policy</a>
+<a class="block font-['Public_Sans'] text-xs text-slate-500 hover:underline decoration-[#26A678] underline-offset-4" href="#">Terms of Service</a>
+</div>
+<div class="space-y-2">
+<p class="font-label-md text-label-md text-on-surface">Support</p>
+<a class="block font-['Public_Sans'] text-xs text-slate-500 hover:underline decoration-[#26A678] underline-offset-4" href="#">Help Center</a>
+<a class="block font-['Public_Sans'] text-xs text-slate-500 hover:underline decoration-[#26A678] underline-offset-4" href="#">Contact Us</a>
+</div>
+</div>
+</div>
+<div class="pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="font-['Public_Sans'] text-xs text-slate-500">© 2024 Portuguese Digital Wallet. Official Administrative Portal.</p>
+<div class="flex gap-md">
+<span class="material-symbols-outlined text-outline" data-icon="language">language</span>
+<span class="font-caption text-caption text-outline">Português (PT)</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

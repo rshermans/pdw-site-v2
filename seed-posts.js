@@ -103,7 +103,7 @@ db.exec(`
 
 // ── posts ─────────────────────────────────────────────────────────────────────
 const insertPost = db.prepare(`
-  INSERT INTO posts
+  INSERT OR IGNORE INTO posts
     (id, type, title, excerpt, embed_json, source_url, status, scheduled_at, published_at,
      pinned, likes_count, comments_enabled, comments_count, created_at, updated_at, author)
   VALUES
@@ -172,7 +172,7 @@ console.log('  ✓ posts (3)');
 
 // ── media ─────────────────────────────────────────────────────────────────────
 db.prepare(`
-  INSERT INTO media (id, kind, filename, public_path, alt, mime, size_bytes, slot, uses, created_at)
+  INSERT OR IGNORE INTO media (id, kind, filename, public_path, alt, mime, size_bytes, slot, uses, created_at)
   VALUES (@id, @kind, @filename, @public_path, @alt, @mime, @size_bytes, @slot, @uses, @created_at)
 `).run({
   id: 2,
@@ -214,25 +214,25 @@ console.log('  ✓ site_sections (2)');
 
 // ── leads ─────────────────────────────────────────────────────────────────────
 const insertLead = db.prepare(`
-  INSERT INTO leads (id, name, institution, email, subject, message, created_at)
+  INSERT OR IGNORE INTO leads (id, name, institution, email, subject, message, created_at)
   VALUES (@id, @name, @institution, @email, @subject, @message, @created_at)
 `);
 
 [
-  { id: 1, name: "Romulo Sherman",                    institution: "TecMinho", email: "rmagalhaes@tecminho.uminho.pt", subject: "Teste",          message: "Esta e uma mensagem de teste do formulario PDW.",         created_at: "2026-05-14 15:51:01" },
-  { id: 2, name: "Domingos",                          institution: "TECMINHO", email: "dfreitas@tecminho.uminho.pt",   subject: "Teste",          message: "Teste por parte do Rômulo.",                             created_at: "2026-05-14 17:01:30" },
-  { id: 3, name: "Teste Logos",                       institution: "TecMinho", email: "rmagalhaes@tecminho.uminho.pt", subject: "Logos no email", message: "Teste para verificar logos nos templates de email.",     created_at: "2026-05-14 17:14:49" },
-  { id: 4, name: "Rômulo Sherman Magalhães Mota",     institution: "TECMINHO", email: "rmagalhaes@tecminho.uminho.pt", subject: "Teste",          message: "Como podemos solicitar o contacto",                      created_at: "2026-05-17 00:22:28" },
+  { id: 1, name: "Romulo Sherman", institution: "TecMinho", email: "rmagalhaes@tecminho.uminho.pt", subject: "Teste", message: "Esta e uma mensagem de teste do formulario PDW.", created_at: "2026-05-14 15:51:01" },
+  { id: 2, name: "Domingos", institution: "TECMINHO", email: "dfreitas@tecminho.uminho.pt", subject: "Teste", message: "Teste por parte do Rômulo.", created_at: "2026-05-14 17:01:30" },
+  { id: 3, name: "Teste Logos", institution: "TecMinho", email: "rmagalhaes@tecminho.uminho.pt", subject: "Logos no email", message: "Teste para verificar logos nos templates de email.", created_at: "2026-05-14 17:14:49" },
+  { id: 4, name: "Rômulo Sherman Magalhães Mota", institution: "TECMINHO", email: "rmagalhaes@tecminho.uminho.pt", subject: "Teste", message: "Como podemos solicitar o contacto", created_at: "2026-05-17 00:22:28" },
 ].forEach(r => insertLead.run(r));
 
 console.log('  ✓ leads (4)');
 
 // ── sumário ───────────────────────────────────────────────────────────────────
 const c = {
-  posts:    db.prepare(`SELECT COUNT(*) c FROM posts`).get().c,
-  media:    db.prepare(`SELECT COUNT(*) c FROM media`).get().c,
+  posts: db.prepare(`SELECT COUNT(*) c FROM posts`).get().c,
+  media: db.prepare(`SELECT COUNT(*) c FROM media`).get().c,
   sections: db.prepare(`SELECT COUNT(*) c FROM site_sections`).get().c,
-  leads:    db.prepare(`SELECT COUNT(*) c FROM leads`).get().c,
+  leads: db.prepare(`SELECT COUNT(*) c FROM leads`).get().c,
 };
 console.log(`\n✅ Concluído: posts=${c.posts}  media=${c.media}  sections=${c.sections}  leads=${c.leads}`);
 console.log(`   BD: ${DB_PATH}\n`);

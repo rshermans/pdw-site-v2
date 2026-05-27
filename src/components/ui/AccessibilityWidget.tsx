@@ -60,12 +60,43 @@ function AccIcon({ name, size = 16, color = "currentColor" }: { name: IconName; 
 
 const FONT_STEPS = [80, 90, 100, 110, 120, 130, 140];
 
-export function AccessibilityWidget() {
+const TRANSLATIONS = {
+  pt: {
+    title: "Acessibilidade",
+    viewMode: "Modo de visualização",
+    light: "Claro",
+    dark: "Escuro",
+    contrast: "Contraste",
+    normal: "Normal",
+    highContrast: "Alto contraste",
+    fontSize: "Tamanho da fonte",
+    reset: "Repor predefinições",
+    openWidget: "Abrir opções de acessibilidade",
+    closeWidget: "Fechar opções de acessibilidade"
+  },
+  en: {
+    title: "Accessibility",
+    viewMode: "View Mode",
+    light: "Light",
+    dark: "Dark",
+    contrast: "Contrast",
+    normal: "Normal",
+    highContrast: "High Contrast",
+    fontSize: "Font Size",
+    reset: "Reset Defaults",
+    openWidget: "Open accessibility options",
+    closeWidget: "Close accessibility options"
+  }
+};
+
+export function AccessibilityWidget({ lang = "pt" }: { lang?: string }) {
   const [isOpen, setIsOpen]     = useState(false);
   const [theme, setTheme]       = useState<Theme>("light");
   const [contrast, setContrast] = useState<Contrast>("normal");
   const [fontSize, setFontSize] = useState(100);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  const t = TRANSLATIONS[lang as "pt" | "en"] || TRANSLATIONS.pt;
 
   // Init from localStorage / system preference
   useEffect(() => {
@@ -94,12 +125,45 @@ export function AccessibilityWidget() {
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [isOpen]);
 
-  // Close on Escape
+  // Escape key and Focus Trap
   useEffect(() => {
     if (!isOpen) return;
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setIsOpen(false); }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        return;
+      }
+      
+      if (e.key === "Tab") {
+        const panelEl = panelRef.current;
+        if (!panelEl) return;
+        
+        const focusableElements = Array.from(
+          panelEl.querySelectorAll("button, input, select, textarea, [tabindex='0']")
+        ) as HTMLElement[];
+        
+        if (focusableElements.length === 0) return;
+        
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+        
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            last.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === last) {
+            first.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    }
+    
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
   function applyTheme(val: Theme) {
@@ -245,16 +309,16 @@ export function AccessibilityWidget() {
   return (
     <div style={S.root} ref={panelRef}>
       {isOpen && (
-        <div style={S.panel} role="dialog" aria-label="Opções de acessibilidade" aria-modal="true">
+        <div style={S.panel} role="dialog" aria-label={t.title} aria-modal="true">
           {/* Cabeçalho */}
           <div style={S.panelHead}>
             <div style={S.headLeft}>
               <div style={S.headIcon}>
                 <AccIcon name="accessibility" size={16} color="#fff" />
               </div>
-              <span style={S.headTitle}>Acessibilidade</span>
+              <span style={S.headTitle}>{t.title}</span>
             </div>
-            <button onClick={() => setIsOpen(false)} style={S.closeBtn} aria-label="Fechar painel de acessibilidade">
+            <button onClick={() => setIsOpen(false)} style={S.closeBtn} aria-label={t.closeWidget}>
               <AccIcon name="close" size={16} />
             </button>
           </div>
@@ -262,11 +326,11 @@ export function AccessibilityWidget() {
           <div style={S.body}>
             {/* 1. Modo claro / escuro */}
             <div>
-              <div style={S.sectionLabel}>Modo de visualização</div>
+              <div style={S.sectionLabel}>{t.viewMode}</div>
               <div style={S.btnRow}>
                 {([
-                  { value: "light" as Theme, label: "Claro",  icon: "sun"  as IconName },
-                  { value: "dark"  as Theme, label: "Escuro", icon: "moon" as IconName },
+                  { value: "light" as Theme, label: t.light, icon: "sun"  as IconName },
+                  { value: "dark"  as Theme, label: t.dark,  icon: "moon" as IconName },
                 ]).map(opt => (
                   <button key={opt.value} onClick={() => applyTheme(opt.value)} style={themeBtn(opt)}
                     aria-pressed={theme === opt.value}>
@@ -283,11 +347,11 @@ export function AccessibilityWidget() {
 
             {/* 2. Contraste */}
             <div>
-              <div style={S.sectionLabel}>Contraste</div>
+              <div style={S.sectionLabel}>{t.contrast}</div>
               <div style={S.btnRow}>
                 {([
-                  { value: "normal" as Contrast, label: "Normal" },
-                  { value: "high"   as Contrast, label: "Alto contraste" },
+                  { value: "normal" as Contrast, label: t.normal },
+                  { value: "high"   as Contrast, label: t.highContrast },
                 ]).map(opt => (
                   <button key={opt.value} onClick={() => applyContrast(opt.value)} style={contrastBtn(opt)}
                     aria-pressed={contrast === opt.value}>
@@ -303,7 +367,7 @@ export function AccessibilityWidget() {
             {/* 3. Tamanho da fonte */}
             <div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={S.sectionLabel}>Tamanho da fonte</span>
+                <span style={S.sectionLabel}>{t.fontSize}</span>
                 <span style={{
                   fontSize: 12, fontWeight: 700,
                   color: fontSize !== 100 ? "var(--color-primary,#006c4b)" : "var(--color-muted,#3d4a42)",
@@ -317,7 +381,7 @@ export function AccessibilityWidget() {
                   onClick={() => applyFontSize(Math.max(80, fontSize - 10))}
                   disabled={fontSize <= 80}
                   style={fontStepBtn(fontSize <= 80)}
-                  aria-label="Diminuir tamanho da fonte"
+                  aria-label={`${t.fontSize} -`}
                 >
                   <span style={{ fontSize: 11, fontWeight: 800 }}>A</span>
                 </button>
@@ -334,7 +398,7 @@ export function AccessibilityWidget() {
                     type="range" min={80} max={140} step={10}
                     value={fontSize}
                     onChange={(e) => applyFontSize(Number(e.target.value))}
-                    aria-label="Tamanho da fonte"
+                    aria-label={t.fontSize}
                     style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer", margin: 0 }}
                   />
                   {/* Marcas */}
@@ -354,7 +418,7 @@ export function AccessibilityWidget() {
                   onClick={() => applyFontSize(Math.min(140, fontSize + 10))}
                   disabled={fontSize >= 140}
                   style={fontStepBtn(fontSize >= 140)}
-                  aria-label="Aumentar tamanho da fonte"
+                  aria-label={`${t.fontSize} +`}
                 >
                   <span style={{ fontSize: 18, fontWeight: 800 }}>A</span>
                 </button>
@@ -364,7 +428,7 @@ export function AccessibilityWidget() {
             {/* Repor */}
             {hasChanges && (
               <button onClick={resetAll} style={S.resetBtn}>
-                Repor predefinições
+                {t.reset}
               </button>
             )}
           </div>
@@ -374,7 +438,7 @@ export function AccessibilityWidget() {
       {/* FAB */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        aria-label={isOpen ? "Fechar opções de acessibilidade" : "Abrir opções de acessibilidade"}
+        aria-label={isOpen ? t.closeWidget : t.openWidget}
         aria-expanded={isOpen}
         style={S.fab(isOpen)}
         onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.08)"; }}

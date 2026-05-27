@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Locale } from "@/i18n/config";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface PdwHeaderProps {
   lang: Locale;
@@ -23,6 +23,44 @@ export function PdwHeader({ lang, dict }: PdwHeaderProps) {
     { href: `/${lang}/atualidades`, label: dict.nav.news },
     { href: `/${lang}/contactos`, label: dict.nav.contacts }
   ];
+
+  // Manage Escape key & Focus trap for mobile menu
+  useEffect(() => {
+    if (!menuOpen) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+      }
+      
+      if (e.key === "Tab") {
+        const menuEl = document.querySelector(".mobile-menu");
+        const hamburgerBtn = document.querySelector(".mobile-menu-btn");
+        if (!menuEl || !hamburgerBtn) return;
+        
+        const focusableElements = Array.from(menuEl.querySelectorAll("a, button, input")) as HTMLElement[];
+        focusableElements.unshift(hamburgerBtn as HTMLElement); // Hamburger is part of cycle
+        
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+        
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            last.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === last) {
+            first.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+    
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
 
   return (
     <header className="site-header">
@@ -82,8 +120,8 @@ export function PdwHeader({ lang, dict }: PdwHeaderProps) {
             className="mobile-menu-btn"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menu"
+            aria-expanded={menuOpen}
             style={{
-              display: 'none',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
@@ -112,7 +150,7 @@ export function PdwHeader({ lang, dict }: PdwHeaderProps) {
       {/* Mobile menu dropdown */}
       {menuOpen && (
         <div className="mobile-menu">
-          <nav className="mobile-nav">
+          <nav className="mobile-nav" aria-label={lang === 'pt' ? 'Navegação móvel' : 'Mobile navigation'}>
             {navItems.map((item) => {
               const isActive = pathname === item.href || (item.href !== `/${lang}` && pathname?.startsWith(item.href));
               return (

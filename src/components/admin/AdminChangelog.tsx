@@ -1,5 +1,18 @@
 const CHANGELOG = [
   {
+    version: "v2.1.0",
+    date: "25/05/2026",
+    changes: [
+      "Nova página 'Sobre' com KPIs do projeto, grelha da equipa e parceiros institucionais",
+      "Novo componente de Gestão de Leads na área de administração (LeadsManager)",
+      "Adicionados estilos de Acessibilidade/Alto Contraste para o Triângulo de Confiança e nós associados",
+      "Otimização e correção de avisos do React (keys e Fragment) no LeadsManager e SobreContent",
+      "Otimizações de build para Netlify (dynamic rendering nas rotas SQLite e fallback para Resend API Key)",
+      "Novos tokens de design system, global CSS framework e novos componentes de layout",
+      "Atualização de imagens e perfis dos membros da equipa com conversão para formato PNG e suporte multi-idioma (i18n)",
+    ],
+  },
+  {
     version: "v2.0.0",
     date: "18/05/2026",
     changes: [
@@ -74,7 +87,7 @@ const CHANGELOG = [
     version: "v1.5.0",
     date: "12/05/2026",
     changes: [
-      "Integração do Changelog Timeline",
+      "Integração del Changelog Timeline",
       "Adicionada badge de versão dinâmica no cabeçalho",
       "Atualização das redes sociais no rodapé com ícone dedicado para comunidade",
     ],
@@ -137,7 +150,7 @@ export function AdminChangelog() {
           fontWeight: 700,
           border: "1px solid rgba(56, 189, 248, 0.25)",
         }}>
-          v2.0.0 · atual
+          v2.1.0 · atual
         </span>
       </div>
 

@@ -18,7 +18,7 @@ interface PageHeroProps {
 
 export function PageHero({ eyebrow, titleGradient, title, lead }: PageHeroProps) {
   return (
-    <header className="page-hero">
+    <header className="page-hero" style={{ paddingTop: '24px' }}>
       <span className="page-hero-eyebrow">{eyebrow}</span>
       <h1 className="page-hero-title">
         {titleGradient && (

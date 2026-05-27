@@ -2,10 +2,11 @@ import { getDictionary } from '@/i18n/dictionaries';
 import { Locale, locales } from '@/i18n/config';
 import { PdwHeader } from '@/components/layout/PdwHeader';
 import { PdwFooter } from '@/components/layout/PdwFooter';
-import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { GoogleAnalytics } from '@/components/ui/GoogleAnalytics';
 import { AccessibilityWidget } from '@/components/ui/AccessibilityWidget';
 import type { Metadata } from 'next';
+import "../globals.css";
+import "../accessibility.css";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ lang: locale }));
@@ -47,17 +48,18 @@ export default async function LocaleLayout({
   const dict = await getDictionary(lang as Locale);
 
   return (
-    <>
-      <GoogleAnalytics />
-      <PdwHeader lang={lang as Locale} dict={dict} />
-      <main className="main pt-24 pb-12">
-        <div className="container">
-
-          {children}
-        </div>
-      </main>
-      <PdwFooter lang={lang as Locale} dict={dict} />
-      <AccessibilityWidget />
-    </>
+    <html lang={lang} dir="ltr">
+      <body>
+        <GoogleAnalytics />
+        <PdwHeader lang={lang as Locale} dict={dict} />
+        <main className="main pt-24 pb-12">
+          <div className="container">
+            {children}
+          </div>
+        </main>
+        <PdwFooter lang={lang as Locale} dict={dict} />
+        <AccessibilityWidget lang={lang} />
+      </body>
+    </html>
   );
 }

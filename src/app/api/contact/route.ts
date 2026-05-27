@@ -15,6 +15,15 @@ const leadSchema = z.object({
   message:     z.string().min(10, 'Mensagem deve ter pelo menos 10 caracteres'),
 });
 
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_for_build');
+const adminEmail = process.env.ADMIN_EMAIL ?? 'rmagalhaes@tecminho.uminho.pt';
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pdw.tecminho.uminho.pt').replace(/\/$/, '');
+
+const insertLead = db.prepare(`
+  INSERT INTO leads (name, institution, email, subject, message)
+  VALUES (@name, @institution, @email, @subject, @message)
+`);
+
 export async function POST(request: NextRequest) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const adminEmail = process.env.ADMIN_EMAIL ?? 'rmagalhaes@tecminho.uminho.pt';

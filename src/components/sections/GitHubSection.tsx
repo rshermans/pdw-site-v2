@@ -41,9 +41,9 @@ export function GitHubSection({ lang, content }: GitHubSectionProps) {
     <section>
       <header className="section-header">
         <span className="page-hero-eyebrow">Open Source</span>
-        <h3 className="section-title">
+        <h2 className="section-title">
           {isPt ? 'Transparência verificável.' : 'Verifiable transparency.'}
-        </h3>
+        </h2>
         <p className="section-deck">
           {isPt
             ? 'O código é público. Audite, contribua e construa sobre a PDW — sem caixas negras, sem dependências opacas.'
@@ -81,7 +81,7 @@ export function GitHubSection({ lang, content }: GitHubSectionProps) {
           return (
             <article key={h.icon} className="section-card">
               <div className="github-highlight-icon" aria-hidden="true">{h.icon}</div>
-              <h4 className="feature-title">{t.title}</h4>
+              <h3 className="feature-title">{t.title}</h3>
               <p>{t.text}</p>
             </article>
           );

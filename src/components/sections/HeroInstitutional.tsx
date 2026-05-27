@@ -23,7 +23,7 @@ interface HeroInstitutionalProps {
 
 export function HeroInstitutional({ onPlayDemo, dict, lang }: HeroInstitutionalProps) {
   return (
-    <section className="hero">
+    <section className="hero" aria-labelledby="hero-title">
       <div className="hero-bg-grid" aria-hidden="true" />
 
       <div className="hero-content">
@@ -33,7 +33,7 @@ export function HeroInstitutional({ onPlayDemo, dict, lang }: HeroInstitutionalP
             ? "Em produção · Agenda Blockchain.PT"
             : "In production · Blockchain.PT Agenda"}
         </div>
-        <h1>
+        <h1 id="hero-title">
           <span className="hero-title-line">
             {lang === "pt"
               ? "Acesso a serviços digitais"

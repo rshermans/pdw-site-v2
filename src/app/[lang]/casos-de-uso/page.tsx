@@ -43,7 +43,7 @@ export default async function CasosPage({ params }: { params: Promise<{ lang: st
     <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
 
       {/* ── Page hero ── */}
-      <header className="page-hero">
+      <header className="page-hero" style={{ paddingTop: '24px' }}>
         <span className="eyebrow">{lang === "pt" ? "Casos de uso" : "Use Cases"}</span>
         <h1 className="page-hero-title">
           <span className="text-gradient">

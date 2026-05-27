@@ -148,13 +148,14 @@
 
 /* ===== DARK MODE OVERRIDES ===== */
 [data-theme="dark"] {
-  --pdw-green-700:        #22A66B;
+  --pdw-green-700:        #3ddb95;
   --pdw-navy-900:         #5b9bd5;
   --pdw-bg:               #0E1E2E;
   --pdw-surface:          #152A3E;
+  --pdw-surface-alt:      #1A3347;
   --pdw-border:           #1E3A52;
   --pdw-text:             #E8F4F0;
-  --pdw-text-muted:       #8FAFC7;
+  --pdw-text-muted:       #B3D3EC;
 }
 
 /* ============================================================

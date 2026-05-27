@@ -12,6 +12,7 @@
  * Não usa estado nem `useState` — pode ficar como Server Component
  * para SEO e tempo de carregamento.
  */
+import Image from "next/image";
 
 interface SobreContentProps {
   dict: any;
@@ -31,7 +32,7 @@ export function SobreContent({ dict }: SobreContentProps) {
     { tag: "EUDI ARF", name: "Architecture & Reference Framework", body: dict.about.standards.eudi.split(":").slice(1).join(":").trim() },
   ];
 
-  const team = dict.about.team.members as Array<{ name: string; role: string }>;
+  const team = dict.about.team.members as Array<{ name: string; role: string; photo?: string; linkedin?: string }>;
   const partners = dict.about.partners.list as Array<{ name: string; role: string; description?: string }>;
 
   return (
@@ -49,12 +50,12 @@ export function SobreContent({ dict }: SobreContentProps) {
       {/* Two-column intro */}
       <section className="two-col">
         <div className="section-card section-card-soft">
-          <h3 className="section-title">{dict.about.whatIsPdw.title}</h3>
+          <h2 className="section-title">{dict.about.whatIsPdw.title}</h2>
           <p>{dict.about.whatIsPdw.text}</p>
         </div>
         <div className="section-card section-card-emphasis">
           <span className="callout-tag">Coordenação institucional</span>
-          <h3 className="section-title">O papel da TecMinho</h3>
+          <h2 className="section-title">O papel da TecMinho</h2>
           <p>
             A <strong>TecMinho</strong> — interface da Universidade do Minho para a transferência
             de conhecimento, fundada em 1990 — lidera o desenvolvimento técnico e a coordenação
@@ -72,7 +73,7 @@ export function SobreContent({ dict }: SobreContentProps) {
 
       {/* Strategic context */}
       <section className="section-card">
-        <h3 className="section-title">{dict.about.strategicContext.title}</h3>
+        <h2 className="section-title">{dict.about.strategicContext.title}</h2>
         <p>{dict.about.strategicContext.text}</p>
       </section>
 
@@ -80,13 +81,13 @@ export function SobreContent({ dict }: SobreContentProps) {
       <section>
         <header className="section-header">
           <span className="page-hero-eyebrow">Fundamentos técnicos</span>
-          <h3 className="section-title">{dict.about.standards.title}</h3>
+          <h2 className="section-title">{dict.about.standards.title}</h2>
         </header>
         <div className="standards-grid">
           {standards.map((s) => (
             <article className="standard-block" key={s.tag}>
               <span className="standard-tag">{s.tag}</span>
-              <h4 className="standard-name">{s.name}</h4>
+              <h3 className="standard-name">{s.name}</h3>
               <p className="standard-body">{s.body}</p>
             </article>
           ))}
@@ -97,7 +98,7 @@ export function SobreContent({ dict }: SobreContentProps) {
       <section>
         <header className="section-header">
           <span className="page-hero-eyebrow">{dict.about.team.title}</span>
-          <h3 className="section-title">{dict.about.team.subtitle}</h3>
+          <h2 className="section-title">{dict.about.team.subtitle}</h2>
         </header>
         <div className="team-grid">
           {team.map((member) => {
@@ -106,30 +107,71 @@ export function SobreContent({ dict }: SobreContentProps) {
               .map((s) => s[0])
               .slice(0, 2)
               .join("");
-            return (
+            return member.linkedin ? (
+              <a key={member.name} href={member.linkedin} target="_blank" rel="noopener noreferrer" aria-label={`LinkedIn de ${member.name}`} className="team-card-link">
+                <article className="team-card">
+                  {member.photo ? (
+                    <div className="team-photo team-photo-img">
+                      <Image src={member.photo} alt={member.name} fill={true} className="team-photo-picture" sizes="(max-width: 768px) 80px, 96px" />
+                      <div className="team-photo-linkedin-overlay">
+                        <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ffffff">
+                          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                          <rect width="4" height="12" x="2" y="9"/>
+                          <circle cx="4" cy="4" r="2"/>
+                        </svg>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="team-photo" aria-hidden="true">
+                      <span>{initials}</span>
+                    </div>
+                  )}
+                  <div className="team-name">{member.name}</div>
+                  <div className="team-role">{member.role}</div>
+                  <div className="team-linkedin-badge">
+                    <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                      <rect width="4" height="12" x="2" y="9"/>
+                      <circle cx="4" cy="4" r="2"/>
+                    </svg>
+                    LinkedIn
+                  </div>
+                </article>
+              </a>
+            ) : (
               <article key={member.name} className="team-card">
-                <div className="team-photo" aria-hidden="true">
-                  <span>{initials}</span>
-                </div>
+                {member.photo ? (
+                  <div className="team-photo team-photo-img">
+                    <Image src={member.photo} alt={member.name} fill={true} className="team-photo-picture" sizes="(max-width: 768px) 80px, 96px" />
+                    <div className="team-photo-linkedin-overlay">
+                      <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ffffff">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                        <rect width="4" height="12" x="2" y="9"/>
+                        <circle cx="4" cy="4" r="2"/>
+                      </svg>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="team-photo" aria-hidden="true">
+                    <span>{initials}</span>
+                  </div>
+                )}
                 <div className="team-name">{member.name}</div>
                 <div className="team-role">{member.role}</div>
               </article>
             );
           })}
         </div>
-        <p className="team-footnote">
-          Fotos a fornecer pela equipa de comunicação · placeholders com iniciais até lá.
-        </p>
       </section>
 
       {/* Governance */}
       <section className="two-col">
         <div className="section-card">
-          <h3 className="section-title">{dict.about.governance.title}</h3>
+          <h2 className="section-title">{dict.about.governance.title}</h2>
           <p>{dict.about.governance.text}</p>
         </div>
         <div className="section-card">
-          <h3 className="section-title">Compromisso de exportação</h3>
+          <h2 className="section-title">Compromisso de exportação</h2>
           <p>
             Mais de <strong>dois terços das vendas previstas</strong> destinam-se a mercados
             externos, consolidando a PDW como produto português de exportação na identidade
@@ -142,7 +184,7 @@ export function SobreContent({ dict }: SobreContentProps) {
       <section>
         <header className="section-header">
           <span className="page-hero-eyebrow">Consórcio</span>
-          <h3 className="section-title">{dict.about.partners.title}</h3>
+          <h2 className="section-title">{dict.about.partners.title}</h2>
         </header>
         <div className="partners-list">
           {partners.map((p, i) => (

@@ -21,13 +21,13 @@ export function Breadcrumb({ dict, lang }: BreadcrumbProps) {
   const segments = pathWithoutLocale.split('/').filter(Boolean);
 
   return (
-    <nav aria-label="Breadcrumb" className="mb-6 flex items-center text-sm text-slate-400">
+    <nav aria-label="Breadcrumb" className="breadcrumb">
       <Link 
         href={`/${lang}`}
-        className="flex items-center hover:text-pdw-teal transition-colors"
+        className="breadcrumb-link"
         aria-label={dict?.navigation?.home || "Home"}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="breadcrumb-icon"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </Link>
       
       {segments.map((segment, index) => {
@@ -41,16 +41,16 @@ export function Breadcrumb({ dict, lang }: BreadcrumbProps) {
           .join(' ');
 
         return (
-          <div key={href} className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mx-2 text-slate-600"><path d="m9 18 6-6-6-6"/></svg>
+          <div key={href} className="breadcrumb-separator">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 4px' }}><path d="m9 18 6-6-6-6"/></svg>
             {isLast ? (
-              <span className="text-slate-200 font-medium" aria-current="page">
+              <span className="breadcrumb-active" aria-current="page">
                 {text}
               </span>
             ) : (
               <Link 
                 href={href}
-                className="hover:text-pdw-teal transition-colors"
+                className="breadcrumb-link"
               >
                 {text}
               </Link>

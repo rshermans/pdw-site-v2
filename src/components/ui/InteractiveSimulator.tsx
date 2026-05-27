@@ -39,6 +39,13 @@ export function InteractiveSimulator({ dict, lang }: SimulatorProps) {
     setStep(0);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleVerify();
+    }
+  };
+
   return (
     <div className="simulator-card">
       <div className="simulator-glow" />
@@ -46,6 +53,19 @@ export function InteractiveSimulator({ dict, lang }: SimulatorProps) {
       <div className="simulator-content">
         <h3 className="simulator-title">{t.title}</h3>
         <p className="simulator-subtitle">{t.subtitle}</p>
+
+        <div style={{
+          fontSize: '11px',
+          color: 'var(--color-muted)',
+          padding: '4px 10px',
+          borderLeft: '2px solid var(--color-primary)',
+          borderRadius: '0 4px 4px 0',
+          background: 'rgba(0,108,75,0.05)',
+          marginBottom: '16px',
+          display: 'block'
+        }}>
+          {lang === 'pt' ? '⚠ Demonstração ilustrativa — não representa verificação real' : '⚠ Illustrative demo — does not represent actual verification'}
+        </div>
 
         <AnimatePresence mode="wait">
           {step === 0 && (
@@ -56,6 +76,10 @@ export function InteractiveSimulator({ dict, lang }: SimulatorProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               onClick={handleVerify}
+              onKeyDown={handleKeyDown}
+              tabIndex={0}
+              role="button"
+              aria-label={lang === 'pt' ? 'Simular verificação de diploma digital' : 'Simulate digital diploma verification'}
               whileHover={{ scale: 1.02 }}
             >
               <div className="simulator-icon-large">
@@ -63,9 +87,9 @@ export function InteractiveSimulator({ dict, lang }: SimulatorProps) {
               </div>
               <div style={{ fontWeight: 600 }}>{t.degree}</div>
               <div style={{ fontSize: '14px', color: 'var(--color-muted)' }}>{t.issuer}</div>
-              <button className="cta" style={{ marginTop: '24px' }}>
+              <div className="cta" style={{ marginTop: '24px' }}>
                 {t.verifyBtn}
-              </button>
+              </div>
             </motion.div>
           )}
 

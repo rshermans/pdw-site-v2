@@ -65,7 +65,7 @@ export default async function ContactosPage({
         />
       </AnimatedSection>
       <AnimatedSection delay={0.15}>
-        <LeadFormSection dict={dict} initialEmail={initialEmail} />
+        <LeadFormSection dict={dict} initialEmail={initialEmail} lang={lang} />
       </AnimatedSection>
     </>
   );

@@ -20,9 +20,10 @@ type LeadFormValues = z.infer<typeof leadSchema>;
 interface LeadFormSectionProps {
   dict: any;
   initialEmail?: string;
+  lang: string;
 }
 
-export function LeadFormSection({ dict, initialEmail }: LeadFormSectionProps) {
+export function LeadFormSection({ dict, initialEmail, lang }: LeadFormSectionProps) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -69,8 +70,7 @@ export function LeadFormSection({ dict, initialEmail }: LeadFormSectionProps) {
     color: "var(--color-text)",
     fontSize: 14,
     fontFamily: "inherit",
-    outline: "none",
-    transition: "border-color 0.15s",
+    transition: "border-color 0.15s, box-shadow 0.15s",
     boxSizing: "border-box",
   };
 
@@ -206,6 +206,20 @@ export function LeadFormSection({ dict, initialEmail }: LeadFormSectionProps) {
               Portuguese Digital Wallet Infrastructure · EBSI Approved
             </div>
             {isSubmitted && <div className="badge-verified-seal">OFFICIAL</div>}
+          </div>
+
+          <div style={{
+            fontSize: '11px',
+            color: 'var(--color-muted)',
+            padding: '4px 10px',
+            borderLeft: '2px solid var(--color-primary)',
+            borderRadius: '0 4px 4px 0',
+            background: 'rgba(0,108,75,0.05)',
+            marginTop: '12px',
+            marginBottom: '16px',
+            display: 'block'
+          }}>
+            {lang === 'pt' ? '⚠ Demonstração ilustrativa do site — não representa um passe real' : '⚠ Website illustrative demo — does not represent an actual pass'}
           </div>
 
           {/* Contact info */}

@@ -44,7 +44,6 @@
     "partners": [
       "University of Minho",
       "TecMinho",
-      "Blockchain.PT Agenda",
       "VOID Software",
       "EBSI"
     ]
@@ -135,23 +134,33 @@
       "members": [
         {
           "name": "Pedro Xavier",
-          "role": "Management and Coordination"
+          "role": "Management and Coordination",
+          "photo": "/team/pedro-xavier.png",
+          "linkedin": "https://www.linkedin.com/in/pedro-m-xavier/"
         },
         {
           "name": "Nuno Fernandes",
-          "role": "Technical Coordination"
+          "role": "Technical Coordination",
+          "photo": "/team/nuno-fernandes.png",
+          "linkedin": "https://www.linkedin.com/in/nuno-o-fernandes/"
         },
         {
           "name": "Domingos Freitas",
-          "role": "Development"
+          "role": "Development",
+          "photo": "/team/domingos-freitas.png",
+          "linkedin": "https://www.linkedin.com/in/domingosfreitas/"
         },
         {
           "name": "Miguel Marques",
-          "role": "Development and Strategy"
+          "role": "Development and Strategy",
+          "photo": "/team/miguel-marques.png",
+          "linkedin": "https://www.linkedin.com/in/miguel-marques-cybersecurity/"
         },
         {
           "name": "Kim Peiter Jørgensen",
-          "role": "Strategy"
+          "role": "Strategy",
+          "photo": "/team/kim-jorgensen.png",
+          "linkedin": "https://www.linkedin.com/in/kim-peiter-j%C3%B8rgensen-postdoc-b547221/"
         }
       ]
     },

@@ -11,14 +11,14 @@ interface Props {
 }
 
 const PROVIDER_META: Record<string, { label: string; color: string }> = {
-  pdw: { label: "PDW", color: "#006c4b" },
+  pdw: { label: "PDW", color: "var(--color-primary)" },
   youtube: { label: "YouTube", color: "#FF0033" },
   spotify: { label: "Spotify", color: "#1DB954" },
   linkedin: { label: "LinkedIn", color: "#0A66C2" },
   instagram: { label: "Instagram", color: "#E1306C" },
-  x: { label: "X", color: "#000000" },
-  evento: { label: "Evento", color: "#1a3b5d" },
-  imagem: { label: "Imagem", color: "#3d4a42" },
+  x: { label: "X", color: "var(--color-text)" },
+  evento: { label: "Evento", color: "var(--color-secondary)" },
+  imagem: { label: "Imagem", color: "var(--color-muted)" },
 };
 
 export function PostsManager({ initialPosts }: Props) {
@@ -117,7 +117,7 @@ export function PostsManager({ initialPosts }: Props) {
             const meta = PROVIDER_META[p.type];
             return (
               <li key={p.id} className="admin-posts-list__row">
-                <div className="admin-posts-list__icon" style={{ background: `${meta.color}14`, color: meta.color }}>
+                <div className="admin-posts-list__icon" style={{ background: `color-mix(in srgb, ${meta.color} 12%, transparent)`, color: meta.color }}>
                   {meta.label[0]}
                 </div>
                 <div className="admin-posts-list__main">

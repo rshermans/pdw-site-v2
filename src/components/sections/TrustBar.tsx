@@ -17,8 +17,6 @@ export function TrustBar({ dict }: TrustBarProps) {
     "Universidade do Minho": { logo: "/uminho_logo.png", url: "https://www.uminho.pt/PT" },
     "University of Minho": { logo: "/uminho_logo.png", url: "https://www.uminho.pt/PT" },
     "TecMinho": { logo: "/tcminho-logo.png", url: "https://www.tecminho.uminho.pt/" },
-    "Agenda Blockchain.PT": { logo: "/logo-Blockchain-pt.png", url: "https://blockchain.pt" },
-    "Blockchain.PT Agenda": { logo: "/logo-Blockchain-pt.png", url: "https://blockchain.pt" },
     "VOID Software": { logo: "/logo-void.png", url: "https://void.software/" },
     "EBSI": { logo: "/logo-ebsi.png", url: "https://hub.ebsi.eu/", imgClass: "trust-logo-img--boosted" },
   };
@@ -55,6 +53,7 @@ export function TrustBar({ dict }: TrustBarProps) {
                   src={partner.logo}
                   alt={item}
                   fill
+                  sizes="130px"
                   className={`trust-logo-img${partner.imgClass ? ` ${partner.imgClass}` : ''}`}
                   style={{ objectFit: 'contain' }}
                 />

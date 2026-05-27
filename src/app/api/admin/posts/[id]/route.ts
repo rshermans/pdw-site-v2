@@ -32,3 +32,5 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (!ok) return NextResponse.json({ error: 'not_found' }, { status: 404 });
   return NextResponse.json({ ok: true });
 }
+
+export const dynamic = 'force-dynamic';

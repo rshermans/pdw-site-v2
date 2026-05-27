@@ -53,7 +53,7 @@ export function ValuePillars({ lang }: ValuePillarsProps) {
         ];
 
   return (
-    <section className="pillars-editorial">
+    <section className="pillars-editorial" aria-labelledby="pillars-title">
       <div className="pillars-visual">
         <Image
           src="/Imagem-isometrica.png"
@@ -72,7 +72,7 @@ export function ValuePillars({ lang }: ValuePillarsProps) {
           <span className="pillars-eyebrow">
             {lang === "pt" ? "Os três pilares da PDW" : "The three pillars of PDW"}
           </span>
-          <h2 className="pillars-title">
+          <h2 id="pillars-title" className="pillars-title">
             {lang === "pt"
               ? "Construída sobre três decisões não-negociáveis."
               : "Built on three non-negotiable decisions."}

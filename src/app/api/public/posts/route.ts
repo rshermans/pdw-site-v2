@@ -15,3 +15,5 @@ export async function GET(req: NextRequest) {
   const counts = countPostsByType('published');
   return NextResponse.json({ posts, counts });
 }
+
+export const dynamic = 'force-dynamic';

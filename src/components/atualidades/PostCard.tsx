@@ -401,7 +401,7 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
       {post.source_url && e.image && (
         <div className="atual-press-image">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={e.image} alt="" />
+          <img src={e.image} alt={post.title} />
         </div>
       )}
       <div className="atual-card-body">
