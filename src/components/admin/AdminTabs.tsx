@@ -2,13 +2,15 @@
 import Link from "next/link";
 
 const TABS = [
-  { id: "feed",       label: "Feed · Atualidades" },
-  { id: "videos",     label: "Vídeos" },
-  { id: "logos",      label: "Logos" },
-  { id: "sections",   label: "Secções" },
-  { id: "contactos",  label: "Contactos" },
-  { id: "stats",      label: "Estatísticas" },
-  { id: "changelog",  label: "Changelog" },
+  { id: "feed",        label: "Feed · Atualidades" },
+  { id: "eventos",     label: "Eventos" },
+  { id: "inscricoes",  label: "Inscrições" },
+  { id: "videos",      label: "Vídeos" },
+  { id: "logos",       label: "Logos" },
+  { id: "sections",    label: "Secções" },
+  { id: "contactos",   label: "Contactos" },
+  { id: "stats",       label: "Estatísticas" },
+  { id: "changelog",   label: "Changelog" },
 ];
 
 export function AdminTabs({ active }: { active: string }) {

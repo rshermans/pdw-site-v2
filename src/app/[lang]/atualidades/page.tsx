@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { listPosts, countPostsByType } from "@/lib/posts-db";
+import { getActiveBannerEvento } from "@/lib/eventos-db";
 import { FeedMural } from "@/components/atualidades/FeedMural";
+import { EventoBanner } from "@/components/atualidades/EventoBanner";
 import { Locale } from "@/i18n/config";
 
 export async function generateMetadata({
@@ -32,6 +34,12 @@ export default async function AtualidadesPage({
   const { lang } = await params;
   const posts = listPosts({ status: "published", limit: 24 });
   const counts = countPostsByType("published");
+  const bannerEvento = getActiveBannerEvento();
 
-  return <FeedMural initialPosts={posts} counts={counts} lang={lang as Locale} />;
+  return (
+    <>
+      <FeedMural initialPosts={posts} counts={counts} lang={lang as Locale} />
+      {bannerEvento && <EventoBanner evento={bannerEvento} lang={lang as Locale} />}
+    </>
+  );
 }

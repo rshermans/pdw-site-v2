@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Locale } from "@/i18n/config";
 import { useState, useEffect } from "react";
+import { DownloadButtons } from "@/components/ui/DownloadButtons";
 
 interface PdwHeaderProps {
   lang: Locale;
@@ -94,26 +95,35 @@ export function PdwHeader({ lang, dict }: PdwHeaderProps) {
         </nav>
 
         {/* Right actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div className="lang-switcher" style={{ fontSize: '12px', fontWeight: 600 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div className="lang-switcher-glow">
             {(() => {
               const currentPathWithoutLang = pathname?.replace(`/${lang}`, '') || '';
-              const toggleLangUrl = `/${lang === 'pt' ? 'en' : 'pt'}${currentPathWithoutLang}`;
+              const ptUrl = `/pt${currentPathWithoutLang}`;
+              const enUrl = `/en${currentPathWithoutLang}`;
               return (
-                <Link href={toggleLangUrl} style={{ color: 'var(--color-muted)' }}>
-                  {lang === 'pt' ? 'EN' : 'PT'}
-                </Link>
+                <>
+                  <Link 
+                    href={ptUrl} 
+                    className={lang === 'pt' ? 'active' : ''}
+                    aria-label="Alterar idioma para Português"
+                    title="Português"
+                  >
+                    PT
+                  </Link>
+                  <Link 
+                    href={enUrl} 
+                    className={lang === 'en' ? 'active' : ''}
+                    aria-label="Change language to English"
+                    title="English"
+                  >
+                    EN
+                  </Link>
+                </>
               );
             })()}
           </div>
-          <a
-            href="https://play.google.com/store/apps/details?id=pt.tecminho.pdw&pcampaignid=web_share"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cta"
-          >
-            {dict.nav.cta}
-          </a>
+          <DownloadButtons dict={dict} />
 
           {/* Mobile hamburger */}
           <button

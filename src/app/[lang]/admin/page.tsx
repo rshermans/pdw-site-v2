@@ -7,12 +7,15 @@
 
 import type { Metadata } from "next";
 import { listPosts } from "@/lib/posts-db";
+import { listEventos } from "@/lib/eventos-db";
 import { PostsManager } from "@/components/admin/PostsManager";
+import { EventosManager } from "@/components/admin/EventosManager";
 import { MediaLibrary } from "@/components/admin/MediaLibrary";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { SectionsManager } from "@/components/admin/SectionsManager";
 import { LeadsManager } from "@/components/admin/LeadsManager";
 import { AdminChangelog } from "@/components/admin/AdminChangelog";
+import { InscricoesManager } from "@/components/admin/InscricoesManager";
 
 export const metadata: Metadata = {
   title: "Administração | PDW",
@@ -27,7 +30,8 @@ export default async function AdminPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab = "feed" } = await searchParams;
-  const initialPosts = listPosts({ status: "all", limit: 50 });
+  const initialPosts   = listPosts({ status: "all", limit: 50 });
+  const initialEventos = listEventos();
 
   return (
     <>
@@ -42,7 +46,9 @@ export default async function AdminPage({
 
       <AdminTabs active={tab} />
 
-      {tab === "feed"     && <PostsManager initialPosts={initialPosts} />}
+      {tab === "feed"       && <PostsManager initialPosts={initialPosts} eventos={initialEventos} />}
+      {tab === "eventos"    && <EventosManager initialEventos={initialEventos} />}
+      {tab === "inscricoes" && <InscricoesManager />}
       {tab === "videos"   && <MediaLibrary kind="video" title="Biblioteca de vídeos" slotOptions={["homepage-demo"]} />}
       {tab === "sections" && <SectionsManager />}
       {tab === "logos"    && (

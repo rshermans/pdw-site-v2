@@ -5,9 +5,11 @@
 
 import { useState, useEffect } from "react";
 import type { Post, PostType } from "@/lib/posts-db";
+import type { Evento } from "@/lib/eventos-db";
 
 interface Props {
   initialPosts: Post[];
+  eventos?: Evento[];
 }
 
 const PROVIDER_META: Record<string, { label: string; color: string }> = {
@@ -21,8 +23,11 @@ const PROVIDER_META: Record<string, { label: string; color: string }> = {
   imagem: { label: "Imagem", color: "var(--color-muted)" },
 };
 
-export function PostsManager({ initialPosts }: Props) {
+type ComposeMode = "link" | "evento";
+
+export function PostsManager({ initialPosts, eventos }: Props) {
   const [posts, setPosts] = useState(initialPosts);
+  const [mode, setMode] = useState<ComposeMode>("link");
   const [url, setUrl] = useState("");
   const [detected, setDetected] = useState<any>(null);
   const [title, setTitle] = useState("");
@@ -30,6 +35,27 @@ export function PostsManager({ initialPosts }: Props) {
   const [pinned, setPinned] = useState(false);
   const [scheduleAt, setScheduleAt] = useState("");
   const [saving, setSaving] = useState(false);
+  // evento-mode fields
+  const [eventoUrl, setEventoUrl] = useState("");
+  const [eventoDate, setEventoDate] = useState("");
+  const [associatedEventoId, setAssociatedEventoId] = useState<number | null>(null);
+
+  const handleSelectEvento = (evtId: number) => {
+    setAssociatedEventoId(evtId);
+    const ev = eventos?.find(e => e.id === evtId);
+    if (ev) {
+      setEventoUrl(`/pt/eventos/${ev.slug}`);
+      const dateStr = ev.data_inicio ? ev.data_inicio.replace(" ", "T").slice(0, 16) : "";
+      setEventoDate(dateStr);
+      setTitle(ev.titulo);
+      setExcerpt(ev.descricao_curta || "");
+    } else {
+      setEventoUrl("");
+      setEventoDate("");
+      setTitle("");
+      setExcerpt("");
+    }
+  };
 
   // debounce paste → /api/admin/embed
   useEffect(() => {
@@ -60,28 +86,50 @@ export function PostsManager({ initialPosts }: Props) {
     setPosts(data.posts);
   }
 
+  function resetForm() {
+    setUrl(""); setTitle(""); setExcerpt(""); setPinned(false); setScheduleAt("");
+    setDetected(null); setEventoUrl(""); setEventoDate(""); setAssociatedEventoId(null);
+  }
+
   async function submit(status: "draft" | "published" | "scheduled") {
     if (!title.trim()) return;
     setSaving(true);
     try {
-      const body: any = {
-        type: detected?.provider ?? "pdw",
-        title: title.trim(),
-        excerpt: excerpt.trim() || undefined,
-        embed: detected?.payload,
-        source_url: detected?.canonicalUrl ?? url,
-        status,
-        scheduled_at: status === "scheduled" ? scheduleAt : null,
-        pinned,
-      };
+      let body: any;
+      if (mode === "evento") {
+        const pageUrl = eventoUrl.trim() || "/pt/eventos/webinar-pdw";
+        body = {
+          type: "evento",
+          title: title.trim(),
+          excerpt: excerpt.trim() || undefined,
+          source_url: pageUrl,
+          embed: {
+            date_iso: eventoDate || undefined,
+            rsvp_url: pageUrl,
+          },
+          status,
+          scheduled_at: status === "scheduled" ? scheduleAt : null,
+          pinned,
+        };
+      } else {
+        body = {
+          type: detected?.provider ?? "pdw",
+          title: title.trim(),
+          excerpt: excerpt.trim() || undefined,
+          embed: detected?.payload,
+          source_url: detected?.canonicalUrl ?? url,
+          status,
+          scheduled_at: status === "scheduled" ? scheduleAt : null,
+          pinned,
+        };
+      }
       const r = await fetch("/api/admin/posts", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(body),
       });
       if (r.ok) {
-        setUrl(""); setTitle(""); setExcerpt(""); setPinned(false); setScheduleAt("");
-        setDetected(null);
+        resetForm();
         refresh();
       }
     } finally {
@@ -142,22 +190,92 @@ export function PostsManager({ initialPosts }: Props) {
       <aside className="admin-compose">
         <div className="admin-card">
           <header className="admin-card__head"><h2>Compor novo post</h2></header>
-          <label className="admin-field">
-            <span>Colar URL (YouTube · Spotify · LinkedIn · Instagram · X)</span>
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://…"
-              className={detected ? "is-detected" : ""}
-              style={detected ? { borderColor: PROVIDER_META[detected.provider]?.color } : {}}
-            />
-            {detected && (
-              <div className="admin-detect" style={{ background: PROVIDER_META[detected.provider]?.color }}>
-                {PROVIDER_META[detected.provider]?.label} detectado
-              </div>
-            )}
-          </label>
+
+          {/* Mode toggle */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+            {(["link", "evento"] as ComposeMode[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => { setMode(m); resetForm(); }}
+                className={`admin-btn ${mode === m ? "admin-btn--primary" : "admin-btn--ghost"}`}
+                style={{ flex: 1, fontSize: 13 }}
+              >
+                {m === "link" ? "Link externo" : "Evento / Webinar"}
+              </button>
+            ))}
+          </div>
+
+          {mode === "link" ? (
+            <>
+              <label className="admin-field">
+                <span>Colar URL (YouTube · Spotify · LinkedIn · Instagram · X)</span>
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://…"
+                  className={detected ? "is-detected" : ""}
+                  style={detected ? { borderColor: PROVIDER_META[detected.provider]?.color } : {}}
+                />
+                {detected && (
+                  <div className="admin-detect" style={{ background: PROVIDER_META[detected.provider]?.color }}>
+                    {PROVIDER_META[detected.provider]?.label} detectado
+                  </div>
+                )}
+              </label>
+            </>
+          ) : (
+            <>
+              {eventos && eventos.length > 0 && (
+                <label className="admin-field">
+                  <span>Vincular a Evento Existente (Opcional)</span>
+                  <select
+                    value={associatedEventoId ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      handleSelectEvento(val ? Number(val) : 0);
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "8px 10px",
+                      borderRadius: 8,
+                      border: "1px solid var(--color-border)",
+                      font: "inherit",
+                      fontSize: 13,
+                      background: "var(--color-bg)",
+                      color: "var(--color-text)",
+                      marginBottom: 12,
+                    }}
+                  >
+                    <option value="">-- Selecione um evento cadastrado --</option>
+                    {eventos.map((ev) => (
+                      <option key={ev.id} value={ev.id}>
+                        {ev.titulo} ({ev.data_inicio.slice(0, 10)})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <label className="admin-field">
+                <span>URL da página do evento</span>
+                <input
+                  type="text"
+                  value={eventoUrl}
+                  onChange={(e) => setEventoUrl(e.target.value)}
+                  placeholder="/pt/eventos/webinar-pdw"
+                />
+              </label>
+              <label className="admin-field">
+                <span>Data e hora do evento</span>
+                <input
+                  type="datetime-local"
+                  value={eventoDate}
+                  onChange={(e) => setEventoDate(e.target.value)}
+                />
+              </label>
+            </>
+          )}
 
           <label className="admin-field">
             <span>Título</span>
