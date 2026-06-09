@@ -1,5 +1,17 @@
 const CHANGELOG = [
   {
+    version: "v2.2.0",
+    date: "04/06/2026",
+    changes: [
+      "Novo Módulo de Eventos e Webinars com sistema completo para agendamento, gestão e inscrição em sessões públicas",
+      "Base de dados expandida com migrações automáticas estruturadas e rastreadas (tabela _migrations) no arranque do servidor",
+      "Painel de Administração atualizado com novos separadores para Gestão de Eventos e visualização/exportação de Inscrições",
+      "Compositor de Atualidades enriquecido com opção de vincular publicações de eventos diretamente aos registos da base de dados",
+      "Componente EventoBanner (anúncio flutuante dinâmico) integrado na página de Atualidades para promover o próximo evento ativo",
+      "Otimização do Bento Grid e correção de hostname seguro na extração de URLs para evitar erros de renderização",
+    ],
+  },
+  {
     version: "v2.1.0",
     date: "25/05/2026",
     changes: [
@@ -150,7 +162,7 @@ export function AdminChangelog() {
           fontWeight: 700,
           border: "1px solid rgba(56, 189, 248, 0.25)",
         }}>
-          v2.1.0 · atual
+          v2.2.0 · atual
         </span>
       </div>
 

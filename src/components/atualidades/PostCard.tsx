@@ -31,7 +31,6 @@ const TYPE_LABELS: Record<string, string> = {
 // Bento size per type
 function getCardSize(type: PostType): "wide" | "tall" | "normal" {
   if (type === "youtube" || type === "x") return "wide";
-  if (type === "evento") return "tall";
   return "normal";
 }
 
@@ -126,6 +125,10 @@ const PIN_ICON = (
 );
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
+function safeHostname(url: string): string | null {
+  try { return new URL(url).hostname.replace("www.", ""); } catch { return null; }
+}
+
 function fmtDate(iso: string | null, lang: Locale): string {
   if (!iso) return "";
   return new Date(iso).toLocaleDateString(lang === "pt" ? "pt-PT" : "en-GB", {
@@ -196,6 +199,31 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
   const size = getCardSize(post.type);
   const sizeClass = size === "wide" ? " atual-card--wide" : size === "tall" ? " atual-card--tall" : "";
 
+  // Dynamic localization for the webinar PDW post
+  const displayTitle = (lang === "en" && (post.source_url?.includes("webinar-pdw") || e.rsvp_url?.includes("webinar-pdw")))
+    ? "Webinar — From Blockchain to Wallet: Digital Trust in Practice (updated)"
+    : post.title;
+    
+  const displayExcerpt = (lang === "en" && (post.source_url?.includes("webinar-pdw") || e.rsvp_url?.includes("webinar-pdw")))
+    ? "Join us in this online session to discover how the Portuguese Digital Wallet is transforming digital identity in Portugal. A unique opportunity to learn, debate, and ask your questions directly to our experts."
+    : post.excerpt;
+
+  let eventLink = post.source_url ?? (e.rsvp_url as string | undefined) ?? null;
+  if (eventLink) {
+    if (eventLink.startsWith("/pt/eventos/")) {
+      eventLink = eventLink.replace(/^\/pt\/eventos\//, `/${lang}/eventos/`);
+    } else if (eventLink.startsWith("/en/eventos/")) {
+      eventLink = eventLink.replace(/^\/en\/eventos\//, `/${lang}/eventos/`);
+    }
+  }
+
+  const p: Post = {
+    ...post,
+    title: displayTitle,
+    excerpt: displayExcerpt,
+    source_url: eventLink,
+  };
+
   async function onLike() {
     setLiked(!liked);
     setLikeCount((n) => (liked ? n - 1 : n + 1));
@@ -203,7 +231,7 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
       const r = await fetch("/api/public/likes", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ post_id: post.id }),
+        body: JSON.stringify({ post_id: p.id }),
       });
       const data = await r.json();
       setLiked(data.liked);
@@ -216,7 +244,7 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
       liked={liked}
       likeCount={likeCount}
       onLike={onLike}
-      commentsCount={post.comments_count}
+      commentsCount={p.comments_count}
       lang={lang}
     />
   );
@@ -226,12 +254,12 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
     return (
       <article className="atual-card atual-card-compact">
         <div className="atual-card-compact-media">
-          <CompactMedia post={post} e={e} />
+          <CompactMedia post={p} e={e} />
         </div>
         <div className="atual-card-compact-info">
-          <CardHeader post={post} lang={lang} />
-          <h3 className="atual-title" style={{ fontSize: 14 }}>{post.title}</h3>
-          {post.excerpt && <p className="atual-desc" style={{ fontSize: 12, marginTop: 4 }}>{post.excerpt}</p>}
+          <CardHeader post={p} lang={lang} />
+          <h3 className="atual-title" style={{ fontSize: 14 }}>{p.title}</h3>
+          {p.excerpt && <p className="atual-desc" style={{ fontSize: 12, marginTop: 4 }}>{p.excerpt}</p>}
           {engagement}
         </div>
       </article>
@@ -239,22 +267,22 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
   }
 
   // ── YouTube ─────────────────────────────────────────────────────────────────
-  if (post.type === "youtube") {
+  if (p.type === "youtube") {
     return (
       <article className={"atual-card atual-card-youtube" + sizeClass}>
-        <CardHeader post={post} lang={lang} />
+        <CardHeader post={p} lang={lang} />
         <div className="atual-embed">
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${e.videoId}`}
-            title={post.title}
+            title={p.title}
             loading="lazy"
             allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
         </div>
         <div className="atual-card-body">
-          <h3 className="atual-title">{post.title}</h3>
-          {post.excerpt && <p className="atual-desc">{post.excerpt}</p>}
+          <h3 className="atual-title">{p.title}</h3>
+          {p.excerpt && <p className="atual-desc">{p.excerpt}</p>}
         </div>
         {engagement}
       </article>
@@ -262,18 +290,18 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
   }
 
   // ── Spotify ──────────────────────────────────────────────────────────────────
-  if (post.type === "spotify") {
+  if (p.type === "spotify") {
     return (
       <article className={"atual-card atual-card-podcast" + sizeClass}>
-        <CardHeader post={post} lang={lang} />
+        <CardHeader post={p} lang={lang} />
         <div className="atual-podcast-player">
           <div className="atual-podcast-art" aria-hidden="true">{POD_ICON}</div>
           <div className="atual-podcast-info">
-            <div className="atual-podcast-source">{post.excerpt?.slice(0, 40) ?? "Podcast"}</div>
-            <div className="atual-podcast-title">{post.title}</div>
+            <div className="atual-podcast-source">{p.excerpt?.slice(0, 40) ?? "Podcast"}</div>
+            <div className="atual-podcast-title">{p.title}</div>
           </div>
           <a
-            href={post.source_url ?? "#"}
+            href={p.source_url ?? "#"}
             target="_blank"
             rel="noopener noreferrer"
             className="atual-podcast-play"
@@ -285,7 +313,7 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
           </a>
         </div>
         <div className="atual-card-body">
-          <h3 className="atual-title">{post.title}</h3>
+          <h3 className="atual-title">{p.title}</h3>
         </div>
         {engagement}
       </article>
@@ -293,24 +321,24 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
   }
 
   // ── LinkedIn ─────────────────────────────────────────────────────────────────
-  if (post.type === "linkedin") {
+  if (p.type === "linkedin") {
     return (
       <article className={"atual-card atual-card-linkedin" + sizeClass}>
-        <CardHeader post={post} lang={lang} />
-        <a className="atual-social-link" href={post.source_url ?? "#"} target="_blank" rel="noopener noreferrer">
+        <CardHeader post={p} lang={lang} />
+        <a className="atual-social-link" href={p.source_url ?? "#"} target="_blank" rel="noopener noreferrer">
           <div className="atual-social-header">
             <span className="atual-social-platform">{LI_ICON} LinkedIn</span>
             <span className="atual-social-handle">{e.author ?? "TecMinho"}</span>
           </div>
           <div className="atual-social-body">
-            {post.excerpt && <p>{post.excerpt}</p>}
+            {p.excerpt && <p>{p.excerpt}</p>}
             <span className="atual-social-cta">
               {lang === "pt" ? "Ler publicação no LinkedIn →" : "Read post on LinkedIn →"}
             </span>
           </div>
         </a>
         <div className="atual-card-body">
-          <h3 className="atual-title">{post.title}</h3>
+          <h3 className="atual-title">{p.title}</h3>
         </div>
         {engagement}
       </article>
@@ -318,24 +346,24 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
   }
 
   // ── Instagram ─────────────────────────────────────────────────────────────────
-  if (post.type === "instagram") {
+  if (p.type === "instagram") {
     return (
       <article className={"atual-card atual-card-instagram" + sizeClass}>
-        <CardHeader post={post} lang={lang} />
-        <a className="atual-social-link" href={post.source_url ?? "#"} target="_blank" rel="noopener noreferrer">
+        <CardHeader post={p} lang={lang} />
+        <a className="atual-social-link" href={p.source_url ?? "#"} target="_blank" rel="noopener noreferrer">
           <div className="atual-social-header">
             <span className="atual-social-platform">{IG_ICON} Instagram</span>
             <span className="atual-social-handle">{e.author ? `@${e.author}` : "@tecminho"}</span>
           </div>
           <div className="atual-social-body">
-            {post.excerpt && <p>{post.excerpt}</p>}
+            {p.excerpt && <p>{p.excerpt}</p>}
             <span className="atual-social-cta">
               {lang === "pt" ? "Ver no Instagram →" : "View on Instagram →"}
             </span>
           </div>
         </a>
         <div className="atual-card-body">
-          <h3 className="atual-title">{post.title}</h3>
+          <h3 className="atual-title">{p.title}</h3>
         </div>
         {engagement}
       </article>
@@ -343,10 +371,10 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
   }
 
   // ── X (Twitter) ───────────────────────────────────────────────────────────────
-  if (post.type === "x") {
+  if (p.type === "x") {
     return (
       <article className={"atual-card atual-card-x" + sizeClass}>
-        <CardHeader post={post} lang={lang} />
+        <CardHeader post={p} lang={lang} />
         <div className="atual-x-body" style={{ padding: "12px 18px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#000", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -356,20 +384,20 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
               <div style={{ fontSize: 12, fontWeight: 700 }}>{e.author ?? "@PDW_PT"}</div>
             </div>
           </div>
-          {post.excerpt && (
+          {p.excerpt && (
             <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "var(--color-text)" }}>
-              {post.excerpt}
+              {p.excerpt}
             </p>
           )}
-          {post.source_url && (
-            <a href={post.source_url} target="_blank" rel="noopener noreferrer"
+          {p.source_url && (
+            <a href={p.source_url} target="_blank" rel="noopener noreferrer"
               style={{ display: "inline-block", marginTop: 8, fontSize: 12, color: "#0A66C2", fontWeight: 600 }}>
               {lang === "pt" ? "Ver no X →" : "View on X →"}
             </a>
           )}
         </div>
         <div className="atual-card-body">
-          <h3 className="atual-title">{post.title}</h3>
+          <h3 className="atual-title">{p.title}</h3>
         </div>
         {engagement}
       </article>
@@ -377,39 +405,74 @@ export function PostCard({ post, lang, compact = false }: { post: Post; lang: Lo
   }
 
   // ── Imagem ────────────────────────────────────────────────────────────────────
-  if (post.type === "imagem" && e.src) {
+  if (p.type === "imagem" && e.src) {
     return (
       <article className={"atual-card atual-card-press" + sizeClass}>
-        <CardHeader post={post} lang={lang} />
+        <CardHeader post={p} lang={lang} />
         <div className="atual-press-image">
-          <Image src={e.src} alt={e.alt ?? post.title} width={800} height={450}
+          <Image src={e.src} alt={e.alt ?? p.title} width={800} height={450}
             style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         </div>
         <div className="atual-card-body">
-          <h3 className="atual-title">{post.title}</h3>
-          {post.excerpt && <p className="atual-desc">{post.excerpt}</p>}
+          <h3 className="atual-title">{p.title}</h3>
+          {p.excerpt && <p className="atual-desc">{p.excerpt}</p>}
         </div>
         {engagement}
       </article>
     );
   }
 
-  // ── Press / PDW / Evento / fallback ──────────────────────────────────────────
+  // ── Evento ────────────────────────────────────────────────────────────────────
+  if (p.type === "evento") {
+    const eventLink = p.source_url ?? (e.rsvp_url as string | undefined);
+    return (
+      <article className={"atual-card atual-card-evento" + sizeClass}>
+        <CardHeader post={p} lang={lang} />
+        <div className="atual-card-body">
+          {(e.date_iso as string | undefined) && (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, fontSize: 12, color: "var(--color-muted)" }}>
+              {CAL_ICON}
+              <time dateTime={e.date_iso as string}>
+                {new Date(e.date_iso as string).toLocaleDateString(lang === "pt" ? "pt-PT" : "en-GB", {
+                  day: "2-digit", month: "long", year: "numeric",
+                })}
+                {(e.time as string | undefined) ? ` · ${e.time as string}` : ""}
+              </time>
+            </div>
+          )}
+          <h3 className="atual-title">{p.title}</h3>
+          {p.excerpt && <p className="atual-desc">{p.excerpt}</p>}
+          {eventLink && (
+            <a
+              href={eventLink}
+              className="cta btn-secondary"
+              style={{ display: "inline-block", marginTop: 10, padding: "7px 14px", fontSize: 13 }}
+            >
+              {lang === "pt" ? "Saber mais / Inscrever →" : "Learn more / Register →"}
+            </a>
+          )}
+        </div>
+        {engagement}
+      </article>
+    );
+  }
+
+  // ── Press / PDW / fallback ─────────────────────────────────────────────────
   return (
     <article className={"atual-card atual-card-press" + sizeClass}>
-      <CardHeader post={post} lang={lang} />
-      {post.source_url && e.image && (
+      <CardHeader post={p} lang={lang} />
+      {p.source_url && e.image && (
         <div className="atual-press-image">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={e.image} alt={post.title} />
+          <img src={e.image} alt={p.title} />
         </div>
       )}
       <div className="atual-card-body">
-        <h3 className="atual-title">{post.title}</h3>
-        {post.excerpt && <p className="atual-desc">{post.excerpt}</p>}
-        {post.source_url && (
+        <h3 className="atual-title">{p.title}</h3>
+        {p.excerpt && <p className="atual-desc">{p.excerpt}</p>}
+        {p.source_url && safeHostname(p.source_url) && (
           <div className="atual-source">
-            {new URL(post.source_url).hostname.replace("www.", "")}
+            {safeHostname(p.source_url)}
           </div>
         )}
       </div>

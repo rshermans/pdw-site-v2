@@ -30,15 +30,29 @@ db.exec(`
   );
 `);
 
-// ── Migrate auto no boot (idempotente, lê o SQL da pasta migrations/) ────────
+// ── Migration tracking table ─────────────────────────────────────────────────
+db.exec(`
+  CREATE TABLE IF NOT EXISTS _migrations (
+    name       TEXT PRIMARY KEY,
+    applied_at TEXT DEFAULT (datetime('now'))
+  );
+`);
+
+// ── Migrate auto no boot (rastreia ficheiros aplicados) ───────────────────────
 const MIGRATIONS_DIR = path.join(process.cwd(), 'migrations');
 if (fs.existsSync(MIGRATIONS_DIR)) {
+  const applied = new Set(
+    (db.prepare('SELECT name FROM _migrations').all() as { name: string }[]).map(r => r.name)
+  );
   const files = fs.readdirSync(MIGRATIONS_DIR)
     .filter((f) => f.endsWith('.sql'))
     .sort();
   for (const f of files) {
-    const sql = fs.readFileSync(path.join(MIGRATIONS_DIR, f), 'utf8');
-    db.exec(sql);
+    if (!applied.has(f)) {
+      const sql = fs.readFileSync(path.join(MIGRATIONS_DIR, f), 'utf8');
+      db.exec(sql);
+      db.prepare('INSERT INTO _migrations (name) VALUES (?)').run(f);
+    }
   }
 }
 
