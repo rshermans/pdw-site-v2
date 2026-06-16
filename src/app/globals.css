@@ -3502,8 +3502,26 @@ html {
 .admin-posts-list__actions button {
   background: transparent; border: 0; cursor: pointer;
   padding: 4px 6px; font-size: 14px; opacity: 0.7;
+  transition: opacity 0.15s, transform 0.15s;
 }
-.admin-posts-list__actions button:hover { opacity: 1; }
+.admin-posts-list__actions button:hover { opacity: 1; transform: scale(1.15); }
+
+/* ── Edit mode highlights ───────────────────────────────────── */
+.admin-posts-list__row--editing {
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+.admin-card--editing {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15), 0 4px 14px rgba(245, 158, 11, 0.08);
+}
+.admin-card--editing .admin-card__head {
+  border-bottom-color: rgba(245, 158, 11, 0.25);
+}
+.admin-card--editing .admin-card__head h2 {
+  color: #b45309;
+}
 
 .admin-compose { display: flex; flex-direction: column; gap: 14px; }
 .admin-field { display: block; margin-bottom: 12px; }
@@ -4098,6 +4116,21 @@ html {
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+a.atual-card-badge-link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+a.atual-card-badge-link:hover {
+  background: color-mix(in srgb, var(--badge-color) 22%, transparent);
+  border-color: color-mix(in srgb, var(--badge-color) 30%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--badge-color) 18%, transparent);
+  transform: translateY(-1px);
+}
+a.atual-card-badge-link:active {
+  transform: translateY(0);
 }
 .atual-card-pinned {
   display: inline-flex;
