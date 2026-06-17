@@ -136,17 +136,43 @@ function fmtDate(iso: string | null, lang: Locale): string {
   });
 }
 
+// ── External link icon ──────────────────────────────────────────────────────────
+const EXTLINK_ICON = (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ marginLeft: 2, opacity: 0.7 }}>
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+  </svg>
+);
+
 // ── Card header badge ──────────────────────────────────────────────────────────
 function CardHeader({ post, lang }: { post: Post; lang: Locale }) {
   const color = TYPE_COLORS[post.type] ?? "#3d4a42";
   const label = TYPE_LABELS[post.type] ?? post.type;
   const icon  = TYPE_ICONS[post.type] ?? PRESS_ICON;
   const date  = fmtDate(post.published_at ?? post.created_at, lang);
+  const hasLink = !!post.source_url;
+
+  const badgeContent = (
+    <>{icon} {label}{hasLink && EXTLINK_ICON}</>
+  );
+
   return (
     <div className="atual-card-header">
-      <div className="atual-card-badge" style={{ "--badge-color": color } as React.CSSProperties}>
-        {icon} {label}
-      </div>
+      {hasLink ? (
+        <a
+          href={post.source_url!}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="atual-card-badge atual-card-badge-link"
+          style={{ "--badge-color": color } as React.CSSProperties}
+          title={lang === "pt" ? `Abrir no ${label}` : `Open on ${label}`}
+        >
+          {badgeContent}
+        </a>
+      ) : (
+        <div className="atual-card-badge" style={{ "--badge-color": color } as React.CSSProperties}>
+          {badgeContent}
+        </div>
+      )}
       {post.pinned && (
         <div className="atual-card-pinned">
           {PIN_ICON} {lang === "pt" ? "Fixado" : "Pinned"}

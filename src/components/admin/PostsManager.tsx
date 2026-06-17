@@ -1,6 +1,7 @@
 // pdw-site-v2/src/components/admin/PostsManager.tsx
 // Client component principal do /admin/atualidades.
 // Mostra lista de posts à esquerda, compose bar + preview à direita.
+// Suporta criar novos posts E editar posts existentes.
 "use client";
 
 import { useState, useEffect } from "react";
@@ -23,6 +24,8 @@ const PROVIDER_META: Record<string, { label: string; color: string }> = {
   imagem: { label: "Imagem", color: "var(--color-muted)" },
 };
 
+const POST_TYPES: PostType[] = ["pdw", "youtube", "spotify", "linkedin", "instagram", "x", "evento", "imagem"];
+
 type ComposeMode = "link" | "evento";
 
 export function PostsManager({ initialPosts, eventos }: Props) {
@@ -39,6 +42,11 @@ export function PostsManager({ initialPosts, eventos }: Props) {
   const [eventoUrl, setEventoUrl] = useState("");
   const [eventoDate, setEventoDate] = useState("");
   const [associatedEventoId, setAssociatedEventoId] = useState<number | null>(null);
+  // ── Edit mode ──────────────────────────────────────────────────────────────
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [editType, setEditType] = useState<PostType>("pdw");
+  const [editSourceUrl, setEditSourceUrl] = useState("");
+  const [editStatus, setEditStatus] = useState<"draft" | "published" | "scheduled">("published");
 
   const handleSelectEvento = (evtId: number) => {
     setAssociatedEventoId(evtId);
@@ -59,6 +67,7 @@ export function PostsManager({ initialPosts, eventos }: Props) {
 
   // debounce paste → /api/admin/embed
   useEffect(() => {
+    if (editingPost) return; // Skip auto-detect during edit
     if (!url) { setDetected(null); return; }
     const t = setTimeout(async () => {
       try {
@@ -89,48 +98,108 @@ export function PostsManager({ initialPosts, eventos }: Props) {
   function resetForm() {
     setUrl(""); setTitle(""); setExcerpt(""); setPinned(false); setScheduleAt("");
     setDetected(null); setEventoUrl(""); setEventoDate(""); setAssociatedEventoId(null);
+    setEditingPost(null); setEditType("pdw"); setEditSourceUrl(""); setEditStatus("published");
   }
 
+  // ── Start editing a post ─────────────────────────────────────────────────
+  function startEdit(p: Post) {
+    setEditingPost(p);
+    setTitle(p.title);
+    setExcerpt(p.excerpt ?? "");
+    setPinned(p.pinned);
+    setEditType(p.type);
+    setEditSourceUrl(p.source_url ?? "");
+    setEditStatus(p.status as "draft" | "published" | "scheduled");
+    setScheduleAt(p.scheduled_at ? p.scheduled_at.replace(" ", "T").slice(0, 16) : "");
+
+    // Determine mode
+    if (p.type === "evento") {
+      setMode("evento");
+      setEventoUrl(p.source_url ?? "");
+      const embed = p.embed ?? {};
+      setEventoDate(embed.date_iso ? String(embed.date_iso).replace(" ", "T").slice(0, 16) : "");
+    } else {
+      setMode("link");
+      setUrl(p.source_url ?? "");
+    }
+  }
+
+  // ── Submit: create or update ──────────────────────────────────────────────
   async function submit(status: "draft" | "published" | "scheduled") {
     if (!title.trim()) return;
     setSaving(true);
     try {
-      let body: any;
-      if (mode === "evento") {
-        const pageUrl = eventoUrl.trim() || "/pt/eventos/webinar-pdw";
-        body = {
-          type: "evento",
+      if (editingPost) {
+        // ── PATCH (update existing) ──
+        const body: any = {
           title: title.trim(),
           excerpt: excerpt.trim() || undefined,
-          source_url: pageUrl,
-          embed: {
+          pinned,
+          status,
+          scheduled_at: status === "scheduled" ? scheduleAt : null,
+        };
+
+        if (editingPost.type === "evento" || mode === "evento") {
+          body.type = "evento";
+          body.source_url = eventoUrl.trim() || editingPost.source_url;
+          body.embed = {
+            ...(editingPost.embed ?? {}),
             date_iso: eventoDate || undefined,
-            rsvp_url: pageUrl,
-          },
-          status,
-          scheduled_at: status === "scheduled" ? scheduleAt : null,
-          pinned,
-        };
+            rsvp_url: eventoUrl.trim() || editingPost.source_url,
+          };
+        } else {
+          body.type = editType;
+          body.source_url = editSourceUrl.trim() || editingPost.source_url;
+        }
+
+        const r = await fetch(`/api/admin/posts/${editingPost.id}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (r.ok) {
+          resetForm();
+          refresh();
+        }
       } else {
-        body = {
-          type: detected?.provider ?? "pdw",
-          title: title.trim(),
-          excerpt: excerpt.trim() || undefined,
-          embed: detected?.payload,
-          source_url: detected?.canonicalUrl ?? url,
-          status,
-          scheduled_at: status === "scheduled" ? scheduleAt : null,
-          pinned,
-        };
-      }
-      const r = await fetch("/api/admin/posts", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (r.ok) {
-        resetForm();
-        refresh();
+        // ── POST (create new) ──
+        let body: any;
+        if (mode === "evento") {
+          const pageUrl = eventoUrl.trim() || "/pt/eventos/webinar-pdw";
+          body = {
+            type: "evento",
+            title: title.trim(),
+            excerpt: excerpt.trim() || undefined,
+            source_url: pageUrl,
+            embed: {
+              date_iso: eventoDate || undefined,
+              rsvp_url: pageUrl,
+            },
+            status,
+            scheduled_at: status === "scheduled" ? scheduleAt : null,
+            pinned,
+          };
+        } else {
+          body = {
+            type: detected?.provider ?? "pdw",
+            title: title.trim(),
+            excerpt: excerpt.trim() || undefined,
+            embed: detected?.payload,
+            source_url: detected?.canonicalUrl ?? url,
+            status,
+            scheduled_at: status === "scheduled" ? scheduleAt : null,
+            pinned,
+          };
+        }
+        const r = await fetch("/api/admin/posts", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (r.ok) {
+          resetForm();
+          refresh();
+        }
       }
     } finally {
       setSaving(false);
@@ -140,7 +209,11 @@ export function PostsManager({ initialPosts, eventos }: Props) {
   async function remove(id: number) {
     if (!confirm("Eliminar este post?")) return;
     const r = await fetch(`/api/admin/posts/${id}`, { method: "DELETE" });
-    if (r.ok) setPosts(posts.filter(p => p.id !== id));
+    if (r.ok) {
+      setPosts(posts.filter(p => p.id !== id));
+      // If we were editing this post, exit edit mode
+      if (editingPost?.id === id) resetForm();
+    }
   }
 
   async function togglePin(p: Post) {
@@ -151,6 +224,8 @@ export function PostsManager({ initialPosts, eventos }: Props) {
     });
     if (r.ok) refresh();
   }
+
+  const isEditing = !!editingPost;
 
   return (
     <div className="admin-feed-layout">
@@ -163,8 +238,15 @@ export function PostsManager({ initialPosts, eventos }: Props) {
         <ul className="admin-posts-list">
           {posts.map(p => {
             const meta = PROVIDER_META[p.type];
+            const isActive = editingPost?.id === p.id;
             return (
-              <li key={p.id} className="admin-posts-list__row">
+              <li
+                key={p.id}
+                className={
+                  "admin-posts-list__row" +
+                  (isActive ? " admin-posts-list__row--editing" : "")
+                }
+              >
                 <div className="admin-posts-list__icon" style={{ background: `color-mix(in srgb, ${meta.color} 12%, transparent)`, color: meta.color }}>
                   {meta.label[0]}
                 </div>
@@ -177,6 +259,7 @@ export function PostsManager({ initialPosts, eventos }: Props) {
                   <span>💬 {p.comments_count}</span>
                 </div>
                 <div className="admin-posts-list__actions">
+                  <button onClick={() => startEdit(p)} aria-label="Editar" title="Editar post">✏️</button>
                   <button onClick={() => togglePin(p)} aria-label="Fixar/desafixar">📌</button>
                   <button onClick={() => remove(p.id)} aria-label="Eliminar">🗑</button>
                 </div>
@@ -186,27 +269,86 @@ export function PostsManager({ initialPosts, eventos }: Props) {
         </ul>
       </section>
 
-      {/* Right: compose */}
+      {/* Right: compose / edit */}
       <aside className="admin-compose">
-        <div className="admin-card">
-          <header className="admin-card__head"><h2>Compor novo post</h2></header>
-
-          {/* Mode toggle */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-            {(["link", "evento"] as ComposeMode[]).map((m) => (
+        <div className={"admin-card" + (isEditing ? " admin-card--editing" : "")}>
+          <header className="admin-card__head">
+            <h2>
+              {isEditing
+                ? `Editar post #${editingPost!.id}`
+                : "Compor novo post"
+              }
+            </h2>
+            {isEditing && (
               <button
-                key={m}
                 type="button"
-                onClick={() => { setMode(m); resetForm(); }}
-                className={`admin-btn ${mode === m ? "admin-btn--primary" : "admin-btn--ghost"}`}
-                style={{ flex: 1, fontSize: 13 }}
+                onClick={resetForm}
+                className="admin-btn admin-btn--ghost"
+                style={{ fontSize: 12, padding: "6px 12px" }}
               >
-                {m === "link" ? "Link externo" : "Evento / Webinar"}
+                ✕ Cancelar
               </button>
-            ))}
-          </div>
+            )}
+          </header>
 
-          {mode === "link" ? (
+          {/* Edit mode: type + source_url fields */}
+          {isEditing && editingPost!.type !== "evento" && (
+            <>
+              <label className="admin-field">
+                <span>Tipo</span>
+                <select
+                  value={editType}
+                  onChange={(e) => setEditType(e.target.value as PostType)}
+                  style={{
+                    width: "100%",
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    border: "1px solid var(--color-border)",
+                    font: "inherit",
+                    fontSize: 13,
+                    background: "var(--color-bg)",
+                    color: "var(--color-text)",
+                    marginBottom: 12,
+                  }}
+                >
+                  {POST_TYPES.map(t => (
+                    <option key={t} value={t}>
+                      {PROVIDER_META[t]?.label ?? t}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="admin-field">
+                <span>URL da fonte</span>
+                <input
+                  type="url"
+                  value={editSourceUrl}
+                  onChange={(e) => setEditSourceUrl(e.target.value)}
+                  placeholder="https://…"
+                />
+              </label>
+            </>
+          )}
+
+          {/* Mode toggle — only in create mode */}
+          {!isEditing && (
+            <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+              {(["link", "evento"] as ComposeMode[]).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => { setMode(m); resetForm(); }}
+                  className={`admin-btn ${mode === m ? "admin-btn--primary" : "admin-btn--ghost"}`}
+                  style={{ flex: 1, fontSize: 13 }}
+                >
+                  {m === "link" ? "Link externo" : "Evento / Webinar"}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Link mode fields */}
+          {(mode === "link" && !isEditing) ? (
             <>
               <label className="admin-field">
                 <span>Colar URL (YouTube · Spotify · LinkedIn · Instagram · X)</span>
@@ -225,9 +367,9 @@ export function PostsManager({ initialPosts, eventos }: Props) {
                 )}
               </label>
             </>
-          ) : (
+          ) : (mode === "evento" || (isEditing && editingPost?.type === "evento")) ? (
             <>
-              {eventos && eventos.length > 0 && (
+              {!isEditing && eventos && eventos.length > 0 && (
                 <label className="admin-field">
                   <span>Vincular a Evento Existente (Opcional)</span>
                   <select
@@ -275,7 +417,7 @@ export function PostsManager({ initialPosts, eventos }: Props) {
                 />
               </label>
             </>
-          )}
+          ) : null}
 
           <label className="admin-field">
             <span>Título</span>
@@ -292,23 +434,70 @@ export function PostsManager({ initialPosts, eventos }: Props) {
             <span>Fixar no topo</span>
           </label>
 
+          {/* Status selector — only in edit mode */}
+          {isEditing && (
+            <label className="admin-field">
+              <span>Estado</span>
+              <select
+                value={editStatus}
+                onChange={(e) => setEditStatus(e.target.value as "draft" | "published" | "scheduled")}
+                style={{
+                  width: "100%",
+                  padding: "8px 10px",
+                  borderRadius: 8,
+                  border: "1px solid var(--color-border)",
+                  font: "inherit",
+                  fontSize: 13,
+                  background: "var(--color-bg)",
+                  color: "var(--color-text)",
+                  marginBottom: 12,
+                }}
+              >
+                <option value="published">Publicado</option>
+                <option value="draft">Rascunho</option>
+                <option value="scheduled">Agendado</option>
+              </select>
+            </label>
+          )}
+
           <label className="admin-field">
             <span>Agendar (opcional)</span>
             <input type="datetime-local" value={scheduleAt} onChange={(e) => setScheduleAt(e.target.value)} />
           </label>
 
           <div className="admin-actions">
-            <button onClick={() => submit("published")} disabled={saving} className="admin-btn admin-btn--primary">
-              {saving ? "A publicar…" : "Publicar agora"}
-            </button>
-            {scheduleAt && (
-              <button onClick={() => submit("scheduled")} disabled={saving} className="admin-btn">
-                Agendar
-              </button>
+            {isEditing ? (
+              <>
+                <button
+                  onClick={() => submit(editStatus)}
+                  disabled={saving}
+                  className="admin-btn admin-btn--primary"
+                >
+                  {saving ? "A guardar…" : "💾 Guardar alterações"}
+                </button>
+                <button
+                  onClick={resetForm}
+                  type="button"
+                  className="admin-btn admin-btn--ghost"
+                >
+                  Cancelar
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => submit("published")} disabled={saving} className="admin-btn admin-btn--primary">
+                  {saving ? "A publicar…" : "Publicar agora"}
+                </button>
+                {scheduleAt && (
+                  <button onClick={() => submit("scheduled")} disabled={saving} className="admin-btn">
+                    Agendar
+                  </button>
+                )}
+                <button onClick={() => submit("draft")} disabled={saving} className="admin-btn admin-btn--ghost">
+                  Rascunho
+                </button>
+              </>
             )}
-            <button onClick={() => submit("draft")} disabled={saving} className="admin-btn admin-btn--ghost">
-              Rascunho
-            </button>
           </div>
         </div>
       </aside>
