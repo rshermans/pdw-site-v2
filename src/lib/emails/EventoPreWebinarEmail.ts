@@ -1,15 +1,15 @@
-export interface EventoInscricaoProps {
+export interface EventoPreWebinarProps {
   nome: string;
   eventoTitulo: string;
   eventoData: string;
   plataforma: string | null;
+  linkAcesso: string | null;
   siteUrl: string;
-  lang?: 'pt' | 'en';
-  linkAcesso?: string | null;
   speakers?: Array<{ nome: string; cargo: string | null }>;
+  lang?: 'pt' | 'en';
 }
 
-function formatInscricaoDate(iso: string, lang: 'pt' | 'en') {
+function formatPreWebinarDate(iso: string, lang: 'pt' | 'en') {
   try {
     const d = new Date(iso);
     const locale = lang === 'pt' ? 'pt-PT' : 'en-GB';
@@ -38,45 +38,39 @@ function formatInscricaoDate(iso: string, lang: 'pt' | 'en') {
   }
 }
 
-export function buildEventoInscricaoHtml({
+export function buildEventoPreWebinarHtml({
   nome,
   eventoTitulo,
   eventoData,
   plataforma,
-  siteUrl,
-  lang = 'pt',
   linkAcesso,
+  siteUrl,
   speakers = [],
-}: EventoInscricaoProps): string {
+  lang = 'pt',
+}: EventoPreWebinarProps): string {
   const isPt = lang === 'pt';
-  const { dateStr, timeStr } = formatInscricaoDate(eventoData, lang);
+  const { dateStr, timeStr } = formatPreWebinarDate(eventoData, lang);
 
   // Localization resources
   const T = {
-    title: isPt ? 'Inscrição confirmada — Portuguese Digital Wallet' : 'Registration confirmed — Portuguese Digital Wallet',
-    badge: isPt ? '✓ Inscrição confirmada' : '✓ Registration confirmed',
+    title: isPt ? 'Lembrete — Webinar começa em breve' : 'Reminder — Webinar starting soon',
+    badge: isPt ? '⏰ Lembrete' : '⏰ Reminder',
     greeting: isPt ? 'Olá' : 'Hello',
-    alertText: isPt ? 'Inscrição confirmada!' : 'Registration confirmed!',
-    bodyText: isPt 
-      ? `A sua inscrição no webinar <strong>"${eventoTitulo}"</strong> foi registada com sucesso. Estamos muito contentes por contar com a sua presença!`
-      : `Your registration for the webinar <strong>"${eventoTitulo}"</strong> has been successfully confirmed. We look forward to your participation!`,
+    alertText: isPt ? 'O webinar começa em breve!' : 'The webinar is starting soon!',
     labelDate: isPt ? '📅 Data' : '📅 Date',
     labelTime: isPt ? '🕙 Hora' : '🕙 Time',
     labelPlatform: isPt ? '💻 Plataforma' : '💻 Platform',
-    btnText: isPt ? 'Aceder ao Evento →' : 'Join Event →',
+    btnText: isPt ? 'Entrar no Zoom →' : 'Join on Zoom →',
     copyText: isPt ? 'Ou copie:' : 'Or copy:',
-    linkWillBeSent: isPt 
-      ? 'O link de acesso será enviado por e-mail antes do início do evento.' 
-      : 'The access link will be sent by e-mail prior to the start of the event.',
-    nextStepsTitle: isPt ? '🔜 O que acontece a seguir' : '🔜 What happens next',
-    steps: isPt ? [
-      'Guarde a data na sua agenda para não se esquecer',
-      'Receberá o link de acesso na sua caixa de correio antes do evento',
-      'Prepare as suas perguntas para colocar aos oradores'
+    tipsTitle: isPt ? '💡 Antes de entrar' : '💡 Before entering',
+    tips: isPt ? [
+      'Teste o áudio e vídeo antes de entrar',
+      'Prepare as suas perguntas para os speakers',
+      'Partilhe o link com colegas interessados'
     ] : [
-      'Save the date in your calendar so you don\'t forget',
-      'You will receive the access link in your inbox prior to the event',
-      'Prepare your questions to ask the speakers'
+      'Test your audio and video before joining',
+      'Prepare your questions for the speakers',
+      'Share the link with interested colleagues'
     ],
     speakersTitle: isPt ? 'Oradores' : 'Speakers',
   };
@@ -115,7 +109,7 @@ export function buildEventoInscricaoHtml({
   }
 
   // Fallback direct link
-  const cleanLink = linkAcesso || '';
+  const cleanLink = linkAcesso || '#';
 
   return `<!DOCTYPE html>
 <html lang="${lang}" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -199,7 +193,7 @@ export function buildEventoInscricaoHtml({
                   <td style="background: linear-gradient(135deg, rgba(0,108,75,0.06) 0%, rgba(26,59,93,0.06) 100%); border: 1px solid rgba(0,108,75,0.15); border-radius:12px; padding:28px 24px; text-align:center;">
                     <p style="margin:0 0 8px 0; font-size:14px; font-weight:600; color:#006c4b; text-transform:uppercase; letter-spacing:0.08em;">WEBINAR</p>
                     <h1 style="margin:0 0 6px 0; font-size:28px; font-weight:800; color:#181c1e; line-height:1.15; letter-spacing:-0.02em;" class="dark-text hero-title">${T.alertText}</h1>
-                    <p style="margin:0; font-size:15px; color:#3d4a42; line-height:1.5;" class="dark-muted">${T.bodyText}</p>
+                    <p style="margin:0; font-size:18px; color:#3d4a42; line-height:1.4;" class="dark-muted">${eventoTitulo}</p>
                   </td>
                 </tr>
               </table>
@@ -230,10 +224,9 @@ export function buildEventoInscricaoHtml({
             </td>
           </tr>
 
-          <!-- CTA BUTTON OR LINK WILL BE SENT -->
+          <!-- CTA BUTTON -->
           <tr>
             <td style="background-color:#ffffff; padding: 0 32px 32px 32px; border-left:1px solid #d1d9e0; border-right:1px solid #d1d9e0; text-align:center;" class="dark-card dark-border mobile-padding">
-              ${cleanLink ? `
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
                 <tr>
                   <td style="border-radius:999px; background: linear-gradient(135deg, #006c4b 0%, #009668 100%); box-shadow: 0 8px 20px rgba(0,108,75,0.3);">
@@ -243,34 +236,25 @@ export function buildEventoInscricaoHtml({
                   </td>
                 </tr>
               </table>
+              ${linkAcesso ? `
               <p style="margin:16px 0 0 0; font-size:12px; color:#8FAFC7;">
                 ${T.copyText} <a href="${cleanLink}" style="color:#006c4b; text-decoration:underline; word-break:break-all; font-size:11px;">${cleanLink}</a>
               </p>
-              ` : `
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td style="background-color:#f8fafc; border:1px dashed #d1d9e0; border-radius:12px; padding:18px 20px;" class="dark-bg dark-border">
-                    <p style="margin:0; font-size:14px; color:#1a3b5d; font-weight:600; line-height:1.5;" class="dark-text">
-                      🔗 ${T.linkWillBeSent}
-                    </p>
-                  </td>
-                </tr>
-              </table>
-              `}
+              ` : ''}
             </td>
           </tr>
 
-          <!-- NEXT STEPS SECTION -->
+          <!-- TIPS SECTION -->
           <tr>
             <td style="background-color:#ffffff; padding: 0 32px 32px 32px; border-left:1px solid #d1d9e0; border-right:1px solid #d1d9e0;" class="dark-card dark-border mobile-padding">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid #d1d9e0;" class="dark-border">
                 <tr>
                   <td style="padding-top:24px;">
-                    <p style="margin:0 0 12px 0; font-size:13px; font-weight:700; color:#006c4b; text-transform:uppercase; letter-spacing:0.08em;">${T.nextStepsTitle}</p>
+                    <p style="margin:0 0 12px 0; font-size:13px; font-weight:700; color:#006c4b; text-transform:uppercase; letter-spacing:0.08em;">${T.tipsTitle}</p>
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                      ${T.steps.map(step => `
+                      ${T.tips.map(tip => `
                       <tr>
-                        <td style="padding:6px 0; font-size:14px; color:#3d4a42; line-height:1.5;" class="dark-muted">✅ ${step}</td>
+                        <td style="padding:6px 0; font-size:14px; color:#3d4a42; line-height:1.5;" class="dark-muted">✅ ${tip}</td>
                       </tr>
                       `).join('')}
                     </table>
@@ -332,7 +316,7 @@ export function buildEventoInscricaoHtml({
           <tr>
             <td style="background-color:#0E1E2E; padding: 24px 32px; border-radius: 0 0 8px 8px; text-align:center;" class="mobile-padding">
               <p style="margin:0 0 6px 0; font-size:14px; font-weight:600; color:#E8F4F0;">Portuguese Digital Wallet</p>
-              <p style="margin:0 0 14px 0; font-size:11px; color:#8FAFC7; line-height:1.4;">
+              <p style="margin:0 0 16px 0; font-size:11px; color:#8FAFC7; line-height:1.4;">
                 ${isPt ? 'Da Blockchain à Carteira: o futuro da confiança digital' : 'From Blockchain to Wallet: the future of digital trust'}
               </p>
               <p style="margin:0; font-size:11px; color:#8FAFC7;">

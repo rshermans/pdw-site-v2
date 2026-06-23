@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getEventoBySlug, createInscricao, countInscricoes, hashIp } from '@/lib/eventos-db';
+import { getEventoBySlug, createInscricao, countInscricoes, hashIp, getEventoSpeakers } from '@/lib/eventos-db';
 import { buildEventoInscricaoHtml } from '@/lib/emails/EventoInscricaoEmail';
 import { buildAdminInscricaoHtml } from '@/lib/emails/AdminInscricaoEmail';
 import { sendMail } from '@/lib/mailer';
@@ -117,6 +117,8 @@ export async function POST(
   }
 
   // Envio de emails via Gmail SMTP (falha silenciosa — inscrição já está guardada)
+  const speakers = getEventoSpeakers(evento.id);
+
   try {
     await Promise.all([
       sendMail({
@@ -129,6 +131,8 @@ export async function POST(
           plataforma: evento.plataforma,
           siteUrl,
           lang,
+          linkAcesso: evento.link_acesso,
+          speakers,
         }),
       }),
       sendMail({
