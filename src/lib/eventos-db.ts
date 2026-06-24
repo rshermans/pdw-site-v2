@@ -270,6 +270,10 @@ export interface Inscricao {
 export interface InscricaoComEvento extends Inscricao {
   evento_data_inicio: string;
   evento_plataforma: string | null;
+  evento_link_acesso: string | null;
+  evento_video_gravacao_url: string | null;
+  evento_slides_url: string | null;
+  evento_slug: string;
 }
 
 export function listInscricoes(eventoId?: number): Inscricao[] {
@@ -327,7 +331,9 @@ export function createInscricao(input: CreateInscricaoInput): number {
 
 export function getInscricaoById(id: number): InscricaoComEvento | null {
   const r = db.prepare(`
-    SELECT ei.*, e.titulo AS evento_titulo, e.data_inicio AS evento_data_inicio, e.plataforma AS evento_plataforma
+    SELECT ei.*, e.titulo AS evento_titulo, e.data_inicio AS evento_data_inicio, e.plataforma AS evento_plataforma,
+           e.link_acesso AS evento_link_acesso, e.video_gravacao_url AS evento_video_gravacao_url, e.slides_url AS evento_slides_url,
+           e.slug AS evento_slug
     FROM evento_inscricoes ei
     JOIN eventos e ON e.id = ei.evento_id
     WHERE ei.id = ?

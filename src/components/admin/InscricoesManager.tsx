@@ -45,6 +45,8 @@ export function InscricoesManager() {
   const [deletingId, setDeletingId]           = useState<number | null>(null);
   const [isBulkSending, setIsBulkSending]     = useState(false);
   const [bulkResult, setBulkResult]           = useState<{ sent: number; failed: number } | null>(null);
+  const [bulkTemplate, setBulkTemplate]       = useState<string>("confirmacao");
+  const [rowTemplates, setRowTemplates]       = useState<Record<number, string>>({});
 
   useEffect(() => {
     fetch("/api/admin/inscricoes")
@@ -109,11 +111,11 @@ export function InscricoesManager() {
     }
   }
 
-  async function handleResend(id: number) {
+  async function handleResend(id: number, template: string) {
     setResendingId(id);
     setResendOkId(null);
     try {
-      const res = await fetch(`/api/admin/inscricoes/${id}`, { method: "POST" });
+      const res = await fetch(`/api/admin/inscricoes/${id}?template=${template}`, { method: "POST" });
       if (res.ok) {
         setResendOkId(id);
         setTimeout(() => setResendOkId((cur) => (cur === id ? null : cur)), 4000);
@@ -128,14 +130,17 @@ export function InscricoesManager() {
 
   async function handleBulkResend() {
     if (filtered.length === 0) return;
-    if (!window.confirm(`Reenviar email de confirmação a ${filtered.length} inscrito(s)?\n\nEsta operação pode demorar alguns segundos.`)) return;
+    const templateLabel = 
+      bulkTemplate === "confirmacao" ? "Confirmação (A)" : 
+      bulkTemplate === "lembrete" ? "Lembrete Pré-Webinar (B)" : "Feedback Pós-Webinar (C)";
+    if (!window.confirm(`Enviar e-mail de ${templateLabel} a ${filtered.length} inscrito(s)?\n\nEsta operação pode demorar alguns segundos.`)) return;
     setIsBulkSending(true);
     setBulkResult(null);
     try {
       const res = await fetch("/api/admin/inscricoes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: filtered.map((i) => i.id) }),
+        body: JSON.stringify({ ids: filtered.map((i) => i.id), template: bulkTemplate }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -174,6 +179,24 @@ export function InscricoesManager() {
               ✓ {bulkResult.sent} enviados{bulkResult.failed > 0 ? `, ${bulkResult.failed} falharam` : ""}
             </span>
           )}
+          <select
+            value={bulkTemplate}
+            onChange={(e) => setBulkTemplate(e.target.value)}
+            style={{
+              padding: "5px 10px",
+              borderRadius: 8,
+              border: "1px solid var(--color-border)",
+              fontSize: 13,
+              background: "var(--color-bg)",
+              color: "var(--color-text)",
+              fontFamily: "inherit",
+              outline: "none",
+            }}
+          >
+            <option value="confirmacao">Confirmação (Modelo A)</option>
+            <option value="lembrete">Lembrete Pré-Webinar (Modelo B)</option>
+            <option value="pos_webinar">Agradecimento Pós-Webinar (Modelo C)</option>
+          </select>
           <button
             onClick={handleBulkResend}
             disabled={isBulkSending || filtered.length === 0}
@@ -185,7 +208,7 @@ export function InscricoesManager() {
               opacity: isBulkSending || filtered.length === 0 ? 0.5 : 1,
             }}
           >
-            {isBulkSending ? "A enviar…" : `↩ Reenviar a filtrados (${filtered.length})`}
+            {isBulkSending ? "A enviar…" : `Enviar a filtrados (${filtered.length})`}
           </button>
           <a
             href={csvUrl()}
@@ -356,8 +379,29 @@ export function InscricoesManager() {
 
                         {/* Actions */}
                         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                          <select
+                            value={rowTemplates[i.id] ?? "confirmacao"}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setRowTemplates((prev) => ({ ...prev, [i.id]: val }));
+                            }}
+                            style={{
+                              padding: "5px 10px",
+                              borderRadius: 6,
+                              border: "1px solid var(--color-border)",
+                              fontSize: 12,
+                              background: "var(--color-bg)",
+                              color: "var(--color-text)",
+                              fontFamily: "inherit",
+                              outline: "none",
+                            }}
+                          >
+                            <option value="confirmacao">Confirmação (A)</option>
+                            <option value="lembrete">Lembrete Pré-Webinar (B)</option>
+                            <option value="pos_webinar">Agradecimento Pós-Webinar (C)</option>
+                          </select>
                           <button
-                            onClick={(e) => { e.stopPropagation(); handleResend(i.id); }}
+                            onClick={(e) => { e.stopPropagation(); handleResend(i.id, rowTemplates[i.id] ?? "confirmacao"); }}
                             disabled={resendingId === i.id}
                             style={{
                               ...btnBase,
@@ -367,10 +411,10 @@ export function InscricoesManager() {
                               opacity: resendingId === i.id ? 0.6 : 1,
                             }}
                           >
-                            {resendingId === i.id ? "A enviar…" : "↩ Reenviar email"}
+                            {resendingId === i.id ? "A enviar…" : "Enviar e-mail"}
                           </button>
                           {resendOkId === i.id && (
-                            <span style={{ fontSize: 12, color: "#22c55e" }}>✓ Email enviado</span>
+                            <span style={{ fontSize: 12, color: "#22c55e" }}>✓ Enviado</span>
                           )}
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDelete(i.id); }}

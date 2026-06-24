@@ -1,85 +1,104 @@
-export interface EventoInscricaoProps {
+export interface EventoPosWebinarProps {
   nome: string;
   eventoTitulo: string;
-  eventoData: string;
-  plataforma: string | null;
+  eventoSlug: string;
   siteUrl: string;
-  lang?: 'pt' | 'en';
-  linkAcesso?: string | null;
+  videoGravacaoUrl?: string | null;
+  slidesUrl?: string | null;
   speakers?: Array<{ nome: string; cargo: string | null }>;
+  lang?: 'pt' | 'en';
+  surveyUrl?: string;
 }
 
-function formatInscricaoDate(iso: string, lang: 'pt' | 'en') {
-  try {
-    const d = new Date(iso);
-    const locale = lang === 'pt' ? 'pt-PT' : 'en-GB';
-    
-    const dateStr = d.toLocaleDateString(locale, {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-    
-    let timeStr = d.toLocaleTimeString(locale, {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-    if (lang === 'pt') {
-      timeStr = timeStr.replace(':', 'h');
-    }
-    
-    const offset = d.getTimezoneOffset();
-    const gmtStr = offset === -60 ? 'GMT+1' : 'GMT+0';
-    
-    return { dateStr, timeStr: `${timeStr} (${gmtStr})` };
-  } catch {
-    return { dateStr: iso, timeStr: '' };
-  }
-}
-
-export function buildEventoInscricaoHtml({
+export function buildEventoPosWebinarHtml({
   nome,
   eventoTitulo,
-  eventoData,
-  plataforma,
+  eventoSlug,
   siteUrl,
-  lang = 'pt',
-  linkAcesso,
+  videoGravacaoUrl,
+  slidesUrl,
   speakers = [],
-}: EventoInscricaoProps): string {
+  lang = 'pt',
+  surveyUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSewAYbIhg1XroKxr9ismqo1LShTYLZKkGPNe6xfsDukVIKa7g/viewform',
+}: EventoPosWebinarProps): string {
   const isPt = lang === 'pt';
-  const { dateStr, timeStr } = formatInscricaoDate(eventoData, lang);
 
   // Localization resources
   const T = {
-    title: isPt ? 'Inscrição confirmada — Portuguese Digital Wallet' : 'Registration confirmed — Portuguese Digital Wallet',
-    badge: isPt ? '✓ Inscrição confirmada' : '✓ Registration confirmed',
+    title: isPt ? 'Obrigado — A sua opinião conta' : 'Thank you — Your feedback matters',
+    badge: isPt ? '✅ Obrigado' : '✅ Thank you',
     greeting: isPt ? 'Olá' : 'Hello',
-    alertText: isPt ? 'Inscrição confirmada!' : 'Registration confirmed!',
-    bodyText: isPt 
-      ? `A sua inscrição no webinar <strong>"${eventoTitulo}"</strong> foi registada com sucesso. Estamos muito contentes por contar com a sua presença!`
-      : `Your registration for the webinar <strong>"${eventoTitulo}"</strong> has been successfully confirmed. We look forward to your participation!`,
-    labelDate: isPt ? '📅 Data' : '📅 Date',
-    labelTime: isPt ? '🕙 Hora' : '🕙 Time',
-    labelPlatform: isPt ? '💻 Plataforma' : '💻 Platform',
-    btnText: isPt ? 'Aceder ao Evento →' : 'Join Event →',
+    thankYouText: isPt 
+      ? `Foi um prazer contar com a sua presença no webinar <strong>"${eventoTitulo}"</strong>. Esperamos que tenha sido uma sessão enriquecedora sobre o futuro da confiança digital.`
+      : `It was a pleasure to have you with us at the webinar <strong>"${eventoTitulo}"</strong>. We hope it was an enriching session on the future of digital trust.`,
+    highlightsTitle: isPt ? '📌 Pontos-chave abordados' : '📌 Key Highlights',
+    labelSurvey: isPt 
+      ? 'A sua opinião ajuda-nos a melhorar. São apenas <strong>2 minutos</strong>:' 
+      : 'Your feedback helps us improve. It only takes <strong>2 minutes</strong>:',
+    btnSurvey: isPt ? 'Partilhe a sua opinião →' : 'Share your feedback →',
     copyText: isPt ? 'Ou copie:' : 'Or copy:',
-    linkWillBeSent: isPt 
-      ? 'O link de acesso será enviado por e-mail antes do início do evento.' 
-      : 'The access link will be sent by e-mail prior to the start of the event.',
-    nextStepsTitle: isPt ? '🔜 O que acontece a seguir' : '🔜 What happens next',
-    steps: isPt ? [
-      'Guarde a data na sua agenda para não se esquecer',
-      'Receberá o link de acesso na sua caixa de correio antes do evento',
-      'Prepare as suas perguntas para colocar aos oradores'
-    ] : [
-      'Save the date in your calendar so you don\'t forget',
-      'You will receive the access link in your inbox prior to the event',
-      'Prepare your questions to ask the speakers'
-    ],
+    btnReplay: isPt ? '🎬 Rever a gravação' : '🎬 Watch the recording',
+    btnSlides: isPt ? '📂 Descarregar os slides' : '📂 Download slides',
+    nextStepsTitle: isPt ? '🔜 Próximos passos' : '🔜 Next steps',
+    nextStepsBody: isPt 
+      ? 'Fique atento ao seu email — em breve partilharemos os slides da apresentação e informações sobre futuros eventos do ecossistema Portuguese Digital Wallet.'
+      : 'Stay tuned to your email — we will soon share the presentation slides and information about future events of the Portuguese Digital Wallet ecosystem.',
     speakersTitle: isPt ? 'Oradores' : 'Speakers',
   };
+
+  // Highlights mapping (specific for webinar-pdw vs generic)
+  let highlightsHtml = '';
+  if (eventoSlug === 'webinar-pdw') {
+    highlightsHtml = `
+      <!-- Highlight 1 -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:10px;">
+        <tr>
+          <td style="background: linear-gradient(135deg, rgba(0,108,75,0.05) 0%, rgba(26,59,93,0.05) 100%); border-radius:8px; padding:14px 16px; border-left:3px solid #006c4b;">
+            <p style="margin:0 0 2px 0; font-size:13px; font-weight:700; color:#006c4b;">${isPt ? 'Identidade Digital Soberana' : 'Self-Sovereign Identity'}</p>
+            <p style="margin:0; font-size:13px; color:#3d4a42; line-height:1.5;" class="dark-muted">${isPt ? 'Como a blockchain permite controlar os seus próprios dados online.' : 'How blockchain allows you to control your own data online.'}</p>
+          </td>
+        </tr>
+      </table>
+      <!-- Highlight 2 -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:10px;">
+        <tr>
+          <td style="background: linear-gradient(135deg, rgba(0,108,75,0.05) 0%, rgba(26,59,93,0.05) 100%); border-radius:8px; padding:14px 16px; border-left:3px solid #009668;">
+            <p style="margin:0 0 2px 0; font-size:13px; font-weight:700; color:#009668;">${isPt ? 'Credenciais Verificáveis' : 'Verifiable Credentials'}</p>
+            <p style="margin:0; font-size:13px; color:#3d4a42; line-height:1.5;" class="dark-muted">${isPt ? 'O padrão europeu para documentos digitais seguros e interoperáveis.' : 'The European standard for secure and interoperable digital documents.'}</p>
+          </td>
+        </tr>
+      </table>
+      <!-- Highlight 3 -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:0;">
+        <tr>
+          <td style="background: linear-gradient(135deg, rgba(0,108,75,0.05) 0%, rgba(26,59,93,0.05) 100%); border-radius:8px; padding:14px 16px; border-left:3px solid #1a3b5d;">
+            <p style="margin:0 0 2px 0; font-size:13px; font-weight:700; color:#1a3b5d;">${isPt ? 'Portuguese Digital Wallet' : 'Portuguese Digital Wallet'}</p>
+            <p style="margin:0; font-size:13px; color:#3d4a42; line-height:1.5;" class="dark-muted">${isPt ? 'A carteira digital portuguesa e o seu papel no ecossistema eIDAS 2.0.' : 'The Portuguese digital wallet and its role in the eIDAS 2.0 ecosystem.'}</p>
+          </td>
+        </tr>
+      </table>
+    `;
+  } else {
+    // Generic highlights
+    highlightsHtml = `
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:10px;">
+        <tr>
+          <td style="background: linear-gradient(135deg, rgba(0,108,75,0.05) 0%, rgba(26,59,93,0.05) 100%); border-radius:8px; padding:14px 16px; border-left:3px solid #006c4b;">
+            <p style="margin:0 0 2px 0; font-size:13px; font-weight:700; color:#006c4b;">${isPt ? 'Apresentação e Discussão' : 'Presentation and Debate'}</p>
+            <p style="margin:0; font-size:13px; color:#3d4a42; line-height:1.5;" class="dark-muted">${isPt ? 'Os principais tópicos apresentados durante a sessão.' : 'The main topics discussed during the session.'}</p>
+          </td>
+        </tr>
+      </table>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr>
+          <td style="background: linear-gradient(135deg, rgba(0,108,75,0.05) 0%, rgba(26,59,93,0.05) 100%); border-radius:8px; padding:14px 16px; border-left:3px solid #1a3b5d;">
+            <p style="margin:0 0 2px 0; font-size:13px; font-weight:700; color:#1a3b5d;">${isPt ? 'Questões e Respostas' : 'Questions & Answers'}</p>
+            <p style="margin:0; font-size:13px; color:#3d4a42; line-height:1.5;" class="dark-muted">${isPt ? 'Esclarecimento das dúvidas levantadas pelos participantes.' : 'Clarification of the doubts raised by the audience.'}</p>
+          </td>
+        </tr>
+      </table>
+    `;
+  }
 
   // Build speakers HTML cells
   let speakersBlock = '';
@@ -114,8 +133,36 @@ export function buildEventoInscricaoHtml({
     `;
   }
 
-  // Fallback direct link
-  const cleanLink = linkAcesso || '';
+  // Replay actions block
+  let replayActionsHtml = '';
+  if (videoGravacaoUrl || slidesUrl) {
+    replayActionsHtml = `
+      <!-- RESOURCES -->
+      <tr>
+        <td style="background-color:#ffffff; padding: 16px 32px 32px 32px; border-left:1px solid #d1d9e0; border-right:1px solid #d1d9e0; text-align:center;" class="dark-card dark-border mobile-padding">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto;">
+            <tr>
+              ${videoGravacaoUrl ? `
+              <td style="border-radius:999px; border:2px solid #006c4b; padding:2px;">
+                <a href="${videoGravacaoUrl}" target="_blank" style="display:inline-block; padding:10px 24px; font-size:13px; font-weight:700; color:#006c4b; text-decoration:none; letter-spacing:0.02em;">
+                  ${T.btnReplay}
+                </a>
+              </td>
+              ` : ''}
+              ${videoGravacaoUrl && slidesUrl ? '<td width="10" style="font-size:0;">&nbsp;</td>' : ''}
+              ${slidesUrl ? `
+              <td style="border-radius:999px; border:2px solid #1a3b5d; padding:2px;">
+                <a href="${slidesUrl}" target="_blank" style="display:inline-block; padding:10px 24px; font-size:13px; font-weight:700; color:#1a3b5d; text-decoration:none; letter-spacing:0.02em;">
+                  ${T.btnSlides}
+                </a>
+              </td>
+              ` : ''}
+            </tr>
+          </table>
+        </td>
+      </tr>
+    `;
+  }
 
   return `<!DOCTYPE html>
 <html lang="${lang}" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -140,7 +187,7 @@ export function buildEventoInscricaoHtml({
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
     body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; }
-    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
 
     @media (prefers-color-scheme: dark) {
       .dark-bg { background-color: #0E1E2E !important; }
@@ -154,7 +201,7 @@ export function buildEventoInscricaoHtml({
       .container { width: 100% !important; max-width: 100% !important; }
       .mobile-padding { padding-left: 20px !important; padding-right: 20px !important; }
       .mobile-stack { display: block !important; width: 100% !important; }
-      .hero-title { font-size: 26px !important; }
+      .hero-title { font-size: 24px !important; }
     }
   </style>
 </head>
@@ -166,7 +213,7 @@ export function buildEventoInscricaoHtml({
 
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="container" style="max-width:600px; width:100%;">
 
-          <!-- TOP ACCENT BAR -->
+          <!-- ACCENT BAR -->
           <tr>
             <td style="height:4px; background: linear-gradient(135deg, #006c4b 0%, #009668 50%, #1a3b5d 100%); border-radius: 8px 8px 0 0; font-size:0; line-height:0;">&nbsp;</td>
           </tr>
@@ -176,103 +223,80 @@ export function buildEventoInscricaoHtml({
             <td style="background-color:#ffffff; padding: 28px 32px 20px 32px; border-left:1px solid #d1d9e0; border-right:1px solid #d1d9e0;" class="dark-card dark-border mobile-padding">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
-                  <td style="vertical-align:middle;">
+                  <td>
                     <span style="font-size:18px; font-weight:800; color:#006c4b; letter-spacing:-0.02em;">Portuguese Digital Wallet</span>
                   </td>
-                  <td align="right" style="vertical-align:middle;">
-                    <span style="display:inline-block; background-color:#E8F4F0; color:#006c4b; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; padding:6px 14px; border-radius:999px;">${T.badge}</span>
+                  <td align="right">
+                    <span style="display:inline-block; background-color:#dcfce7; color:#0d6a3d; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; padding:6px 14px; border-radius:999px;">${T.badge}</span>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- HERO SECTION -->
+          <!-- THANK YOU HERO -->
           <tr>
-            <td style="background-color:#ffffff; padding: 8px 32px 32px 32px; border-left:1px solid #d1d9e0; border-right:1px solid #d1d9e0;" class="dark-card dark-border mobile-padding">
+            <td style="background-color:#ffffff; padding: 8px 32px 28px 32px; border-left:1px solid #d1d9e0; border-right:1px solid #d1d9e0;" class="dark-card dark-border mobile-padding">
               <p style="margin:0 0 20px 0; font-size:16px; line-height:1.6; color:#3d4a42;" class="dark-muted">
                 ${T.greeting} <strong style="color:#181c1e;" class="dark-text">${nome}</strong>,
               </p>
 
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td style="background: linear-gradient(135deg, rgba(0,108,75,0.06) 0%, rgba(26,59,93,0.06) 100%); border: 1px solid rgba(0,108,75,0.15); border-radius:12px; padding:28px 24px; text-align:center;">
-                    <p style="margin:0 0 8px 0; font-size:14px; font-weight:600; color:#006c4b; text-transform:uppercase; letter-spacing:0.08em;">WEBINAR</p>
-                    <h1 style="margin:0 0 6px 0; font-size:28px; font-weight:800; color:#181c1e; line-height:1.15; letter-spacing:-0.02em;" class="dark-text hero-title">${T.alertText}</h1>
-                    <p style="margin:0; font-size:15px; color:#3d4a42; line-height:1.5;" class="dark-muted">${T.bodyText}</p>
-                  </td>
-                </tr>
-              </table>
+              <h1 style="margin:0 0 12px 0; font-size:28px; font-weight:800; color:#181c1e; line-height:1.15; letter-spacing:-0.02em;" class="dark-text hero-title">
+                ${isPt ? 'Obrigado por participar! 🎉' : 'Thank you for participating! 🎉'}
+              </h1>
+
+              <p style="margin:0 0 24px 0; font-size:16px; line-height:1.6; color:#3d4a42;" class="dark-muted">
+                ${T.thankYouText}
+              </p>
             </td>
           </tr>
 
-          <!-- EVENT DETAILS -->
+          <!-- KEY HIGHLIGHTS -->
           <tr>
             <td style="background-color:#ffffff; padding: 0 32px 28px 32px; border-left:1px solid #d1d9e0; border-right:1px solid #d1d9e0;" class="dark-card dark-border mobile-padding">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td width="33%" style="padding:12px 8px; text-align:center; background-color:#f7fafc; border-radius:8px;" class="dark-bg mobile-stack">
-                    <p style="margin:0 0 4px 0; font-size:11px; font-weight:600; color:#006c4b; text-transform:uppercase; letter-spacing:0.1em;">${T.labelDate}</p>
-                    <p style="margin:0; font-size:15px; font-weight:700; color:#181c1e;" class="dark-text">${dateStr}</p>
-                  </td>
-                  <td width="4" style="font-size:0;">&nbsp;</td>
-                  <td width="33%" style="padding:12px 8px; text-align:center; background-color:#f7fafc; border-radius:8px;" class="dark-bg mobile-stack">
-                    <p style="margin:0 0 4px 0; font-size:11px; font-weight:600; color:#006c4b; text-transform:uppercase; letter-spacing:0.1em;">${T.labelTime}</p>
-                    <p style="margin:0; font-size:15px; font-weight:700; color:#181c1e;" class="dark-text">${timeStr}</p>
-                  </td>
-                  <td width="4" style="font-size:0;">&nbsp;</td>
-                  <td width="33%" style="padding:12px 8px; text-align:center; background-color:#f7fafc; border-radius:8px;" class="dark-bg mobile-stack">
-                    <p style="margin:0 0 4px 0; font-size:11px; font-weight:600; color:#006c4b; text-transform:uppercase; letter-spacing:0.1em;">${T.labelPlatform}</p>
-                    <p style="margin:0; font-size:15px; font-weight:700; color:#181c1e;" class="dark-text">${plataforma ?? 'Online'}</p>
-                  </td>
-                </tr>
-              </table>
+              <p style="margin:0 0 16px 0; font-size:13px; font-weight:700; color:#1a3b5d; text-transform:uppercase; letter-spacing:0.08em;">${T.highlightsTitle}</p>
+              ${highlightsHtml}
             </td>
           </tr>
 
-          <!-- CTA BUTTON OR LINK WILL BE SENT -->
+          <!-- PRIMARY CTA — SURVEY -->
           <tr>
-            <td style="background-color:#ffffff; padding: 0 32px 32px 32px; border-left:1px solid #d1d9e0; border-right:1px solid #d1d9e0; text-align:center;" class="dark-card dark-border mobile-padding">
-              ${cleanLink ? `
+            <td style="background-color:#ffffff; padding: 0 32px 12px 32px; border-left:1px solid #d1d9e0; border-right:1px solid #d1d9e0; text-align:center;" class="dark-card dark-border mobile-padding">
+              <p style="margin:0 0 16px 0; font-size:15px; color:#3d4a42; line-height:1.5;" class="dark-muted">
+                ${T.labelSurvey}
+              </p>
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
                 <tr>
                   <td style="border-radius:999px; background: linear-gradient(135deg, #006c4b 0%, #009668 100%); box-shadow: 0 8px 20px rgba(0,108,75,0.3);">
-                    <a href="${cleanLink}" target="_blank" style="display:inline-block; padding:16px 48px; font-size:16px; font-weight:700; color:#ffffff; text-decoration:none; letter-spacing:0.02em;">
-                      ${T.btnText}
+                    <a href="${surveyUrl}" target="_blank" style="display:inline-block; padding:16px 44px; font-size:16px; font-weight:700; color:#ffffff; text-decoration:none; letter-spacing:0.02em;">
+                      ${T.btnSurvey}
                     </a>
                   </td>
                 </tr>
               </table>
               <p style="margin:16px 0 0 0; font-size:12px; color:#8FAFC7;">
-                ${T.copyText} <a href="${cleanLink}" style="color:#006c4b; text-decoration:underline; word-break:break-all; font-size:11px;">${cleanLink}</a>
+                ${T.copyText} <a href="${surveyUrl}" style="color:#006c4b; text-decoration:underline; word-break:break-all; font-size:11px;">${surveyUrl}</a>
               </p>
-              ` : `
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td style="background-color:#f8fafc; border:1px dashed #d1d9e0; border-radius:12px; padding:18px 20px;" class="dark-bg dark-border">
-                    <p style="margin:0; font-size:14px; color:#1a3b5d; font-weight:600; line-height:1.5;" class="dark-text">
-                      🔗 ${T.linkWillBeSent}
-                    </p>
-                  </td>
-                </tr>
-              </table>
-              `}
             </td>
           </tr>
 
-          <!-- NEXT STEPS SECTION -->
+          ${replayActionsHtml}
+
+          <!-- NEXT EVENT TEASER -->
           <tr>
             <td style="background-color:#ffffff; padding: 0 32px 32px 32px; border-left:1px solid #d1d9e0; border-right:1px solid #d1d9e0;" class="dark-card dark-border mobile-padding">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid #d1d9e0;" class="dark-border">
                 <tr>
                   <td style="padding-top:24px;">
-                    <p style="margin:0 0 12px 0; font-size:13px; font-weight:700; color:#006c4b; text-transform:uppercase; letter-spacing:0.08em;">${T.nextStepsTitle}</p>
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                      ${T.steps.map(step => `
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f7fafc; border-radius:8px; padding:20px;" class="dark-bg">
                       <tr>
-                        <td style="padding:6px 0; font-size:14px; color:#3d4a42; line-height:1.5;" class="dark-muted">✅ ${step}</td>
+                        <td style="padding:20px;">
+                          <p style="margin:0 0 4px 0; font-size:11px; font-weight:700; color:#006c4b; text-transform:uppercase; letter-spacing:0.1em;">${T.nextStepsTitle}</p>
+                          <p style="margin:0; font-size:14px; line-height:1.6; color:#3d4a42;" class="dark-muted">
+                            ${T.nextStepsBody}
+                          </p>
+                        </td>
                       </tr>
-                      `).join('')}
                     </table>
                   </td>
                 </tr>
@@ -332,7 +356,7 @@ export function buildEventoInscricaoHtml({
           <tr>
             <td style="background-color:#0E1E2E; padding: 24px 32px; border-radius: 0 0 8px 8px; text-align:center;" class="mobile-padding">
               <p style="margin:0 0 6px 0; font-size:14px; font-weight:600; color:#E8F4F0;">Portuguese Digital Wallet</p>
-              <p style="margin:0 0 14px 0; font-size:11px; color:#8FAFC7; line-height:1.4;">
+              <p style="margin:0 0 16px 0; font-size:11px; color:#8FAFC7; line-height:1.4;">
                 ${isPt ? 'Da Blockchain à Carteira: o futuro da confiança digital' : 'From Blockchain to Wallet: the future of digital trust'}
               </p>
               <p style="margin:0; font-size:11px; color:#8FAFC7;">
@@ -348,7 +372,6 @@ export function buildEventoInscricaoHtml({
           </tr>
 
         </table>
-
       </td>
     </tr>
   </table>
