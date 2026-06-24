@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getEventoBySlug, createInscricao, countInscricoes, hashIp, getEventoSpeakers } from '@/lib/eventos-db';
-import { Resend } from 'resend';
 import { buildEventoInscricaoHtml } from '@/lib/emails/EventoInscricaoEmail';
 import { buildAdminInscricaoHtml } from '@/lib/emails/AdminInscricaoEmail';
+import { sendMail } from '@/lib/mailer';
 
 const TIPOS_PARTICIPANTE = ['publico_geral', 'universidade', 'empresa', 'admin_publica', 'outro'] as const;
 const INTERESSES = ['tecnologia', 'diplomas', 'onboarding', 'piloto', 'parceria', 'imprensa'] as const;
@@ -25,7 +25,6 @@ const inscricaoSchema = z.object({
   _hp:                  z.string().optional(),
 });
 
-const resend     = new Resend(process.env.RESEND_API_KEY || 're_dummy_for_build');
 const siteUrl    = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pdw.tecminho.uminho.pt').replace(/\/$/, '');
 const adminEmail = process.env.ADMIN_EMAIL ?? 'rmagalhaes@tecminho.uminho.pt';
 
@@ -117,13 +116,12 @@ export async function POST(
     );
   }
 
-  // Envio de emails via Resend (falha silenciosa — inscrição já está guardada)
+  // Envio de emails via Gmail SMTP (falha silenciosa — inscrição já está guardada)
   const speakers = getEventoSpeakers(evento.id);
 
   try {
     await Promise.all([
-      resend.emails.send({
-        from: 'PDW Events <onboarding@resend.dev>',
+      sendMail({
         to: email,
         subject: `✓ Inscrição confirmada — ${evento.titulo}`,
         html: buildEventoInscricaoHtml({
@@ -137,8 +135,7 @@ export async function POST(
           speakers,
         }),
       }),
-      resend.emails.send({
-        from: 'PDW Inscricoes <onboarding@resend.dev>',
+      sendMail({
         to: adminEmail,
         subject: `[PDW Inscrição] ${nome} — ${evento.titulo}`,
         html: buildAdminInscricaoHtml({

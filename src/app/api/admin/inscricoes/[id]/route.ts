@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getInscricaoById, deleteInscricao, getEventoSpeakers } from '@/lib/eventos-db';
-import { Resend } from 'resend';
 import { buildEventoInscricaoHtml } from '@/lib/emails/EventoInscricaoEmail';
 import { buildEventoPreWebinarHtml } from '@/lib/emails/EventoPreWebinarEmail';
 import { buildEventoPosWebinarHtml } from '@/lib/emails/EventoPosWebinarEmail';
+import { sendMail } from '@/lib/mailer';
 
 function requireAdmin(req: NextRequest): NextResponse | null {
   const cookie    = req.cookies.get('pdw_admin')?.value;
@@ -16,7 +16,6 @@ function requireAdmin(req: NextRequest): NextResponse | null {
   return null;
 }
 
-const resend  = new Resend(process.env.RESEND_API_KEY || 're_dummy_for_build');
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pdw.tecminho.uminho.pt').replace(/\/$/, '');
 
 export async function DELETE(
@@ -109,12 +108,7 @@ export async function POST(
   }
 
   try {
-    await resend.emails.send({
-      from: 'PDW Events <onboarding@resend.dev>',
-      to: inscricao.email,
-      subject,
-      html,
-    });
+    await sendMail({ to: inscricao.email, subject, html });
   } catch (err) {
     console.error('[PDW] Erro ao reenviar email:', err);
     return NextResponse.json({ error: 'Erro ao enviar email' }, { status: 500 });
