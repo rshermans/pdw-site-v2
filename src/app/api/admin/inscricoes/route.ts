@@ -167,11 +167,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      await sendMail({
-        to: inscricao.email,
-        subject,
-        html,
-      });
+      await sendMail({ to: inscricao.email, subject, html });
       sent++;
       await new Promise((r) => setTimeout(r, 200));
     } catch {

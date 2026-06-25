@@ -108,11 +108,7 @@ export async function POST(
   }
 
   try {
-    await sendMail({
-      to: inscricao.email,
-      subject,
-      html,
-    });
+    await sendMail({ to: inscricao.email, subject, html });
   } catch (err) {
     console.error('[PDW] Erro ao reenviar email:', err);
     return NextResponse.json({ error: 'Erro ao enviar email' }, { status: 500 });
